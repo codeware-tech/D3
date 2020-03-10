@@ -1,5 +1,7 @@
 console.log("robot");
+var logs = document.querySelector("#logs");
 
+DRDoubleSDK.resetWatchdog();
 window.setInterval(() => {
   DRDoubleSDK.resetWatchdog();
   DRDoubleSDK.sendCommand("screensaver.nudge");
@@ -12,5 +14,5 @@ socket.onopen = function (event) {
 };
 
 socket.onmessage = function (event) {
-  console.log(event.data);
+  logs.innerHTML += "<div>"+ event.data +"</div>";
 }

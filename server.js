@@ -32,6 +32,7 @@ webSocketServer.on("connection", socket => {
         client.send(message);
       }
     });
-    console.log(message);
   });
+
+  socket.send("Hello from server");
 });
