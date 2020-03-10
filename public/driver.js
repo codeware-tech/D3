@@ -1,33 +1,36 @@
+// Log
 var logs = document.querySelector("#logs");
-var socket = new WebSocket("wss://" + window.location.hostname);
-var publisherMediaStream;
-
-socket.onopen = function(event) {
-  log("Connected");
-};
-
-socket.onclose = function(event) {
-  log("Disconnected");
-};
-
-socket.onmessage = function(event) {
-  log(event.data);
-};
-
 function log(text) {
   console.log(text);
   logs.innerHTML += "<div>" + text + "</div>";
 }
 
-function sayHello() {
-  socket.send("Hello from robot");
+// WebSocket
+var socket = new WebSocket("wss://" + window.location.hostname);
+socket.onopen = function(event) { log("Connected"); };
+socket.onclose = function(event) { log("Disconnected"); };
+socket.onmessage = function(event) {
+  log(event.data);
+  try {
+    
+  } catch (e) {
+    
+  }
+};
+function sendToServer(message) {
+  socket.send(JSON.stringify(message));
 }
 
+// WebRTC
+var constraints = {
+  audio: true,
+  video: { width: 640, height: 480, frameRate: 30 }
+};
+var publisherMediaStream = null;
+var pc = null;
+var transceiver = null;
+
 function startWebcam() {
-  var constraints = {
-    audio: true,
-    video: { width: 640, height: 480, frameRate: 30 }
-  };
   navigator.mediaDevices.getUserMedia(constraints)
     .then(mediaStream => {
       if (mediaStream) {

@@ -21,7 +21,7 @@
         <video id="localVideo"></video>
         <video id="remoteVideo"></video>
       </div>
-      <input type="button" value="Say Hello" onclick="sayHello()">
+      <input type="button" value="Say Hello" onclick="socket.send('Hello from driver')">
       <input type="button" value="Start Webcam" onclick="startWebcam()">
       <div id="logs"></div>
     </main>
