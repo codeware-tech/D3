@@ -1,18 +1,25 @@
-console.log("robot");
 var logs = document.querySelector("#logs");
-
-DRDoubleSDK.resetWatchdog();
-window.setInterval(() => {
-  DRDoubleSDK.resetWatchdog();
-  DRDoubleSDK.sendCommand("screensaver.nudge");
-}, 2000);
-
-var socket = new WebSocket("wss://"+ window.location.hostname +"/signaling");
+var socket = new WebSocket("wss://"+ window.location.hostname);
 
 socket.onopen = function (event) {
-  socket.send("Hello from robot");
+  logs.innerHTML += "<div>Connected</div>";
+};
+
+socket.onclose = function (event) {
+  logs.innerHTML += "<div>Disconnected</div>";
 };
 
 socket.onmessage = function (event) {
   logs.innerHTML += "<div>"+ event.data +"</div>";
 }
+
+function sayHello() {
+  socket.send("Hello from robot");
+}
+
+// DRDoubleSDK is preloaded in the web view on the robot
+DRDoubleSDK.resetWatchdog();
+window.setInterval(() => {
+  DRDoubleSDK.resetWatchdog();
+  DRDoubleSDK.sendCommand("screensaver.nudge");
+}, 2000);
