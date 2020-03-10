@@ -18,8 +18,8 @@
 
     <main>
       <div class="streams">
-        <video id="localVideo"></video>
-        <video id="remoteVideo"></video>
+        <video id="localVideo" autoplay muted></video>
+        <video id="remoteVideo" autoplay></video>
       </div>
       <input type="button" value="Say Hello" onclick="socket.send('Hello from driver')">
       <input type="button" value="Call" onclick="startCall()">

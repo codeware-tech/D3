@@ -151,7 +151,7 @@ async function handleNegotiationNeededEvent() {
 function handleTrackEvent(event) {
   log("*** Track event");
   document.getElementById("remoteVideo").srcObject = event.streams[0];
-  document.getElementById("hangup").disabled = false;
+  // document.getElementById("hangup").disabled = false;
 }
 
 // Handles |icecandidate| events by forwarding the specified
@@ -163,8 +163,9 @@ function handleICECandidateEvent(event) {
     log("*** Outgoing ICE candidate: " + event.candidate.candidate);
 
     sendToServer({
-      type: "candidate",
-      candidate: event.candidate
+      sdpMLineIndex: event.candidate.sdpMLineIndex,
+      sdpMid: event.candidate.sdpMid,
+      candidate: event.candidate.candidate
     });
   }
 }
@@ -267,7 +268,7 @@ function closeVideoCall() {
 
   // Disable the hangup button
 
-  document.getElementById("hangup-button").disabled = true;
+  // document.getElementById("hangup-button").disabled = true;
 }
 
 // Hang up the call by closing our end of the connection, then
@@ -300,7 +301,7 @@ async function handleVideoOfferMsg(msg) {
   // We need to set the remote description to the received SDP offer
   // so that our local WebRTC layer knows how to talk to the caller.
 
-  var desc = new RTCSessionDescription(msg.sdp);
+  var desc = new RTCSessionDescription(msg);
 
   // If the connection isn't stable yet, wait for it...
 
@@ -362,7 +363,7 @@ async function handleVideoAnswerMsg(msg) {
   // Configure the remote description, which is the SDP payload
   // in our "video-answer" message.
 
-  var desc = new RTCSessionDescription(msg.sdp);
+  var desc = new RTCSessionDescription(msg);
   await pc.setRemoteDescription(desc).catch(log);
 }
 
