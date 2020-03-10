@@ -1,16 +1,43 @@
+// Log
 var logs = document.querySelector("#logs");
-var socket = new WebSocket("wss://"+ window.location.hostname);
+function log(text) {
+  console.log(text);
+  logs.innerHTML += "<div>" + text + "</div>";
+}
 
-socket.onopen = function (event) {
-  logs.innerHTML += "<div>Connected</div>";
+var socket = new WebSocket("wss://" + window.location.hostname);
+socket.onopen = function(event) { log("Connected"); };
+socket.onclose = function(event) { log("Disconnected"); };
+socket.onmessage = function(event) {
+  log(event.data);
+  var parsed = null;
+  try {
+    parsed = JSON.parse(event.data);
+  } catch (e) { }
+  if (parsed) {
+    processSignal(parsed);
+  }
 };
 
-socket.onclose = function (event) {
-  logs.innerHTML += "<div>Disconnected</div>";
-};
+function sendToServer(message) {
+  socket.send(JSON.stringify(message));
+}
 
-socket.onmessage = function (event) {
-  logs.innerHTML += "<div>"+ event.data +"</div>";
+function processSignal(signal) {
+  switch (signal.type) {
+    case "startCall":
+      DRDoubleSDK.sendCommand("webrtc.signal", {
+        type: "startCall",
+        servers: signal.servers,
+        transportPolicy: signal.transportPolicy
+      });
+      break;
+
+    case "endCall":
+      DRDoubleSDK.
+      break;
+  }
+
 }
 
 function sayHello() {
