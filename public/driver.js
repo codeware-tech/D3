@@ -44,7 +44,7 @@ function sendToServer(message) {
 // WebRTC
 var constraints = {
   audio: true,
-  video: { width: 640, height: 480, frameRate: 30 }
+  video: true
 };
 var iceConfig = {
   iceTransportPolicy: "all",
