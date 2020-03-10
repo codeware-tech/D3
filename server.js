@@ -22,9 +22,19 @@ server.listen(process.env.PORT, () => {
 
 // Launch websocket server
 const webSocketServer = new WebSocket.Server({ server });
-webSocketServer.on("connection", (webSocket) => {
+webSocketServer.on("connection", (socket) => {
+  console.info("Total connected clients:", webSocketServer.clients.size);
+  app.locals.clients = webSocketServer.clients;
 
-    console.info("Total connected clients:", webSocketServer.clients.size);
+  socket.on("message", (message) => {
+    // Send all messages to all other clients
+    for (var i = 0; i < webSocketServer.clients.length; i++) {
+      var c = webSocketServer.clients[i];
+      if (socket != c) {
+        c.send(message);
+      }
+    }
+    console.log(message);
+  });
 
-    app.locals.clients = webSocketServer.clients;
 });
