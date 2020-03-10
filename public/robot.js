@@ -27,23 +27,47 @@ function sendToServer(message) {
 if (DRDoubleSDK == "undefined") {
   var DRDoubleSDK = {};
 }
+DRDoubleSDK.sendCommand("camera.disable");
+DRDoubleSDK.sendCommand("webrtc.disable");
+// We must reset the watchdog faster than every 3 seconds, so D3 knows that our pages is still running ok.
 DRDoubleSDK.resetWatchdog();
 window.setInterval(() => {
   DRDoubleSDK.resetWatchdog();
   DRDoubleSDK.sendCommand("screensaver.nudge");
 }, 2000);
 
+DRDoubleSDK.sendCommand("events.subscribe", {
+  events: [
+    "DRWebRTC.signal"
+  ]
+});
+
+DRDoubleSDK.on("event", (message) => {
+	// Event messages include: { class: "DRNetwork", key: "info", data: {...} }
+	switch (message.class + "." + message.key) {
+		case "DRWebRTC.signal": {
+      log("Sending: "+ JSON.stringify(message.data));
+      sendToServer(message.data);
+      break;
+		}
+	}
+});
+
 function processSignal(signal) {
   switch (signal.type) {
+    case "startCall":
+      DRDoubleSDK.sendCommand("webrtc.enable");
+      DRDoubleSDK.sendCommand("camera.enable", { template: "h264ForWebRTC" });
+      window.setTimeout(() => {
+        DRDoubleSDK.sendCommand("webrtc.signal", signal);
+      }, 1000);
+      break;
+
     case "endCall":
       DRDoubleSDK.sendCommand("camera.disable");
       DRDoubleSDK.sendCommand("webrtc.disable");
       break;
 
-    case "startCall":
-      DRDoubleSDK.sendCommand("webrtc.enable");
-      DRDoubleSDK.sendCommand("camera.enable", { template: "h264ForWebRTC" });
-      DRDoubleSDK.sendCommand("webrtc.signal", signal);
     default:
       DRDoubleSDK.sendCommand("webrtc.signal", signal);
       break;

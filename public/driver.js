@@ -58,18 +58,18 @@ function startCall() {
   });
 }
 
-function processSignal(signal) {
-  switch (signal.type) {
+function processSignal(msg) {
+  switch (msg.type) {
     case "offer":  // Invitation and offer to chat
-      handleVideoOfferMsg(signal);
+      handleVideoOfferMsg(msg);
       break;
 
     case "answer":  // Callee has answered our offer
-      handleVideoAnswerMsg(signal);
+      handleVideoAnswerMsg(msg);
       break;
 
     case "candidate": // A new ICE candidate has been received
-      handleNewICECandidateMsg(signal);
+      handleNewICECandidateMsg(msg);
       break;
   }
 }
