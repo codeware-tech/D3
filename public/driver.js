@@ -32,28 +32,44 @@ var constraints = {
   audio: true,
   video: { width: 640, height: 480, frameRate: 30 }
 };
+var iceConfig = {
+  iceTransportPolicy: "all",
+  "iceServers": [
+    { urls: [ "stun:rtc-oregon.doublerobotics.com:443" ] },
+    {
+      urls: [
+        "turn:rtc-oregon.doublerobotics.com:443?transport=udp",
+        "turn:rtc-oregon.doublerobotics.com:443?transport=tcp",
+      ],
+      username: "open",
+      credential: "open"
+    }
+  ]
+};
 var webcamStream = null;
 var pc = null;
 var transceiver = null;
 
 function startCall() {
   sendToServer({
-    type: ""
+    type: "startCall",
+    servers: iceConfig.iceServers,
+    transportPolicy: iceConfig.iceTransportPolicy
   });
 }
 
 function processSignal(signal) {
   switch (signal.type) {
-    case "video-offer":  // Invitation and offer to chat
+    case "offer":  // Invitation and offer to chat
       handleVideoOfferMsg(signal);
       break;
 
-    case "new-ice-candidate": // A new ICE candidate has been received
-      handleNewICECandidateMsg(signal);
+    case "answer":  // Callee has answered our offer
+      handleVideoAnswerMsg(signal);
       break;
 
-    case "hang-up": // The other peer has hung up the call
-      closeVideoCall();
+    case "candidate": // A new ICE candidate has been received
+      handleNewICECandidateMsg(signal);
       break;
   }
 }
@@ -70,20 +86,7 @@ async function createPeerConnection() {
   // Create an RTCPeerConnection which knows to use our chosen
   // STUN server.
 
-  pc = new RTCPeerConnection({
-    iceTransportPolicy: "all",
-    "iceServers": [
-      { urls: [ "stun:rtc-oregon.doublerobotics.com:443" ] },
-      {
-        urls: [
-          "turn:rtc-oregon.doublerobotics.com:443?transport=udp",
-          "turn:rtc-oregon.doublerobotics.com:443?transport=tcp",
-        ],
-        username: "open",
-        credential: "open"
-      }
-    ]
-  });
+  pc = new RTCPeerConnection(iceConfig);
 
   // Set up event handlers for the ICE negotiation process.
   pc.onicecandidate = handleICECandidateEvent;
@@ -123,7 +126,7 @@ async function handleNegotiationNeededEvent() {
 
     log("---> Sending the offer to the remote peer");
     sendToServer({
-      type: "video-offer",
+      type: "offer",
       sdp: pc.localDescription
     });
   } catch(err) {
@@ -160,7 +163,7 @@ function handleICECandidateEvent(event) {
     log("*** Outgoing ICE candidate: " + event.candidate.candidate);
 
     sendToServer({
-      type: "new-ice-candidate",
+      type: "candidate",
       candidate: event.candidate
     });
   }
@@ -277,7 +280,7 @@ function hangUpCall() {
   closeVideoCall();
 
   sendToServer({
-    type: "hang-up"
+    type: "endCall"
   });
 }
 
@@ -344,9 +347,23 @@ async function handleVideoOfferMsg(msg) {
   await pc.setLocalDescription(await pc.createAnswer());
 
   sendToServer({
-    type: "video-answer",
+    type: "answer",
     sdp: pc.localDescription
   });
+}
+
+
+// Responds to the "video-answer" message sent to the caller
+// once the callee has decided to accept our request to talk.
+
+async function handleVideoAnswerMsg(msg) {
+  log("*** Call recipient has accepted our call");
+
+  // Configure the remote description, which is the SDP payload
+  // in our "video-answer" message.
+
+  var desc = new RTCSessionDescription(msg.sdp);
+  await pc.setRemoteDescription(desc).catch(log);
 }
 
 // A new ICE candidate has been received from the other peer. Call

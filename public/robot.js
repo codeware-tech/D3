@@ -23,18 +23,29 @@ function sendToServer(message) {
   socket.send(JSON.stringify(message));
 }
 
+// DRDoubleSDK is preloaded in the web view on the robot, so it will show errors on the Glitch.com editor
+if (DRDoubleSDK == "undefined") {
+  var DRDoubleSDK = {};
+}
+DRDoubleSDK.resetWatchdog();
+window.setInterval(() => {
+  DRDoubleSDK.resetWatchdog();
+  DRDoubleSDK.sendCommand("screensaver.nudge");
+}, 2000);
+
 function processSignal(signal) {
   switch (signal.type) {
-    case "startCall":
-      DRDoubleSDK.sendCommand("webrtc.signal", {
-        type: "startCall",
-        servers: signal.servers,
-        transportPolicy: signal.transportPolicy
-      });
+    case "endCall":
+      DRDoubleSDK.sendCommand("camera.disable");
+      DRDoubleSDK.sendCommand("webrtc.disable");
       break;
 
-    case "endCall":
-      DRDoubleSDK.
+    case "startCall":
+      DRDoubleSDK.sendCommand("webrtc.enable");
+      DRDoubleSDK.sendCommand("camera.enable", { template: "h264ForWebRTC" });
+      DRDoubleSDK.sendCommand("webrtc.signal", signal);
+    default:
+      DRDoubleSDK.sendCommand("webrtc.signal", signal);
       break;
   }
 
@@ -43,10 +54,3 @@ function processSignal(signal) {
 function sayHello() {
   socket.send("Hello from robot");
 }
-
-// DRDoubleSDK is preloaded in the web view on the robot, so it will show errors on the Glitch.com editor
-DRDoubleSDK.resetWatchdog();
-window.setInterval(() => {
-  DRDoubleSDK.resetWatchdog();
-  DRDoubleSDK.sendCommand("screensaver.nudge");
-}, 2000);
