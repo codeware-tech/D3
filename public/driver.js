@@ -1,6 +1,9 @@
 // Log
 var logs = document.querySelector("#logs");
 function log(text) {
+  if (text && text.name) {
+    text = text.name;
+  }
   console.log(text);
   logs.innerHTML += "<div>" + text + "</div>";
 }
@@ -33,64 +36,24 @@ var webcamStream = null;
 var pc = null;
 var transceiver = null;
 
-function startWebcam() {
-  navigator.mediaDevices.getUserMedia(constraints)
-    .then(mediaStream => {
-      if (mediaStream) {
-        log("getUserMediaFoundMediaStream");
-
-        var video = document.querySelector("#localVideo");
-        video.srcObject = mediaStream;
-        video.muted = true;
-        video.autoplay = true;
-        video.onloadedmetadata = function(e) {
-          video.play();
-        };
-        webcamStream = mediaStream;
-
-//         this.createPeerConnection();
-
-//         if (this.pc) {
-//           if (this.pc.addTrack !== undefined) {
-//             mediaStream
-//               .getTracks()
-//               .forEach(track => this.pc.addTrack(track, mediaStream));
-//             this.sendLog("addingTracksToRTCPeerConnection");
-//           } else {
-//             this.pc.addStream(mediaStream);
-//             this.sendLog("addingStreamToRTCPeerConnection");
-//           }
-//         }
-
-//         this.acquiredCamera = true;
-
-//         this.drainQueue();
-      } else {
-        log("getUserMediaMissingMediaStream");
-      }
-    })
-    .catch(e => {
-      log(e);
-      log("A webcam is required to start a call. Please allow a webcam by clicking on the camera icon in your browser's toolbar, then refresh the page and try again.");
-    });
+function startCall() {
+  sendToServer({
+    type: ""
+  });
 }
 
 function processSignal(signal) {
   switch (signal.type) {
     case "video-offer":  // Invitation and offer to chat
-      handleVideoOfferMsg(msg);
-      break;
-
-    case "video-answer":  // Callee has answered our offer
-      handleVideoAnswerMsg(msg);
+      handleVideoOfferMsg(signal);
       break;
 
     case "new-ice-candidate": // A new ICE candidate has been received
-      handleNewICECandidateMsg(msg);
+      handleNewICECandidateMsg(signal);
       break;
 
     case "hang-up": // The other peer has hung up the call
-      handleHangUpMsg(msg);
+      closeVideoCall();
       break;
   }
 }
@@ -302,16 +265,6 @@ function closeVideoCall() {
   // Disable the hangup button
 
   document.getElementById("hangup-button").disabled = true;
-  targetUsername = null;
-}
-
-// Handle the "hang-up" message, which is sent if the other peer
-// has hung up the call or otherwise disconnected.
-
-function handleHangUpMsg(msg) {
-  log("*** Received hang up notification from other peer");
-
-  closeVideoCall();
 }
 
 // Hang up the call by closing our end of the connection, then
@@ -324,8 +277,118 @@ function hangUpCall() {
   closeVideoCall();
 
   sendToServer({
-    name: myUsername,
-    target: targetUsername,
     type: "hang-up"
   });
+}
+
+// Accept an offer to video chat. We configure our local settings,
+// create our RTCPeerConnection, get and attach our local camera
+// stream, then create and send an answer to the caller.
+
+async function handleVideoOfferMsg(msg) {
+  // If we're not already connected, create an RTCPeerConnection
+  // to be linked to the caller.
+
+  log("Received call offer");
+  if (!pc) {
+    createPeerConnection();
+  }
+
+  // We need to set the remote description to the received SDP offer
+  // so that our local WebRTC layer knows how to talk to the caller.
+
+  var desc = new RTCSessionDescription(msg.sdp);
+
+  // If the connection isn't stable yet, wait for it...
+
+  if (pc.signalingState != "stable") {
+    log("  - But the signaling state isn't stable, so triggering rollback");
+
+    // Set the local and remove descriptions for rollback; don't proceed
+    // until both return.
+    await Promise.all([
+      pc.setLocalDescription({type: "rollback"}),
+      pc.setRemoteDescription(desc)
+    ]);
+    return;
+  } else {
+    log ("  - Setting remote description");
+    await pc.setRemoteDescription(desc);
+  }
+
+  // Get the webcam stream if we don't already have it
+
+  if (!webcamStream) {
+    try {
+      webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
+    } catch(err) {
+      handleGetUserMediaError(err);
+      return;
+    }
+
+    document.getElementById("localVideo").srcObject = webcamStream;
+
+    // Add the camera stream to the RTCPeerConnection
+
+    try {
+      webcamStream.getTracks().forEach(
+        transceiver = track => pc.addTransceiver(track, {streams: [webcamStream]})
+      );
+    } catch(err) {
+      handleGetUserMediaError(err);
+    }
+  }
+
+  log("---> Creating and sending answer to caller");
+
+  await pc.setLocalDescription(await pc.createAnswer());
+
+  sendToServer({
+    type: "video-answer",
+    sdp: pc.localDescription
+  });
+}
+
+// A new ICE candidate has been received from the other peer. Call
+// RTCPeerConnection.addIceCandidate() to send it along to the
+// local ICE framework.
+
+async function handleNewICECandidateMsg(msg) {
+  var candidate = new RTCIceCandidate(msg.candidate);
+
+  log("*** Adding received ICE candidate: " + JSON.stringify(candidate));
+  try {
+    await pc.addIceCandidate(candidate)
+  } catch(err) {
+    log(err.name);
+  }
+}
+
+// Handle errors which occur when trying to access the local media
+// hardware; that is, exceptions thrown by getUserMedia(). The two most
+// likely scenarios are that the user has no camera and/or microphone
+// or that they declined to share their equipment when prompted. If
+// they simply opted not to share their media, that's not really an
+// error, so we won't present a message in that situation.
+
+function handleGetUserMediaError(e) {
+  log(e.name);
+  switch(e.name) {
+    case "NotFoundError":
+      alert("Unable to open your call because no camera and/or microphone" +
+            "were found.");
+      break;
+    case "SecurityError":
+    case "PermissionDeniedError":
+      // Do nothing; this is the same as the user canceling the call.
+      break;
+    default:
+      alert("Error opening your camera and/or microphone: " + e.message);
+      break;
+  }
+
+  // Make sure we shut down our end of the RTCPeerConnection so we're
+  // ready to try again.
+
+  closeVideoCall();
 }
