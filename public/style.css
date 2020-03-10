@@ -57,12 +57,14 @@ footer {
 
 .streams {
   display: flex;
-  flex-spacing: space-evenly;
+  justify-content: start;
+  margin-bottom: 20px;
 }
 
-.streamContainer {
+.streams video {
   background: #EEEEEE;
   display: block;
   height: 300px;
+  margin-right: 15px;
   width: 400px;
 }
