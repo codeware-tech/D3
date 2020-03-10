@@ -54,3 +54,15 @@ footer {
   padding-top: 1.5em;
   border-top: 1px solid lightgrey;
 }
+
+.streams {
+  display: flex;
+  flex-spacing: space-evenly;
+}
+
+.streamContainer {
+  background: #EEEEEE;
+  display: block;
+  height: 300px;
+  width: 400px;
+}
