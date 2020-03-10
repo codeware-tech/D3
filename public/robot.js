@@ -10,12 +10,32 @@ socket.onopen = function(event) { log("Connected"); };
 socket.onclose = function(event) { log("Disconnected"); };
 socket.onmessage = function(event) {
   log(event.data);
-  var parsed = null;
+  
+  var signal = null;
   try {
-    parsed = JSON.parse(event.data);
+    signal = JSON.parse(event.data);
   } catch (e) { }
-  if (parsed) {
-    processSignal(parsed);
+
+  if (signal) {
+    switch (signal.type) {
+
+      case "startCall":
+        DRDoubleSDK.sendCommand("webrtc.enable");
+        DRDoubleSDK.sendCommand("camera.enable", { template: "h264ForWebRTC" });
+        window.setTimeout(() => {
+          DRDoubleSDK.sendCommand("webrtc.signal", signal);
+        }, 1000);
+        break;
+
+      case "endCall":
+        DRDoubleSDK.sendCommand("camera.disable");
+        DRDoubleSDK.sendCommand("webrtc.disable");
+        break;
+
+      default:
+        DRDoubleSDK.sendCommand("webrtc.signal", signal);
+        break;
+    }
   }
 };
 
@@ -27,8 +47,11 @@ function sendToServer(message) {
 if (DRDoubleSDK == "undefined") {
   var DRDoubleSDK = {};
 }
+
+// Make sure the camera and webrtc modules are off, so we can use them.
 DRDoubleSDK.sendCommand("camera.disable");
 DRDoubleSDK.sendCommand("webrtc.disable");
+
 // We must reset the watchdog faster than every 3 seconds, so D3 knows that our pages is still running ok.
 DRDoubleSDK.resetWatchdog();
 window.setInterval(() => {
@@ -42,39 +65,16 @@ DRDoubleSDK.sendCommand("events.subscribe", {
   ]
 });
 
+// Subscribe to events that we want to receive.
 DRDoubleSDK.on("event", (message) => {
-	// Event messages include: { class: "DRNetwork", key: "info", data: {...} }
+
+  // Event messages include: { class: "DRNetwork", key: "info", data: {...} }
 	switch (message.class + "." + message.key) {
-		case "DRWebRTC.signal": {
+
+    case "DRWebRTC.signal":
       log("Sending: "+ JSON.stringify(message.data));
       sendToServer(message.data);
       break;
-		}
-	}
-});
 
-function processSignal(signal) {
-  switch (signal.type) {
-    case "startCall":
-      DRDoubleSDK.sendCommand("webrtc.enable");
-      DRDoubleSDK.sendCommand("camera.enable", { template: "h264ForWebRTC" });
-      window.setTimeout(() => {
-        DRDoubleSDK.sendCommand("webrtc.signal", signal);
-      }, 1000);
-      break;
-
-    case "endCall":
-      DRDoubleSDK.sendCommand("camera.disable");
-      DRDoubleSDK.sendCommand("webrtc.disable");
-      break;
-
-    default:
-      DRDoubleSDK.sendCommand("webrtc.signal", signal);
-      break;
   }
-
-}
-
-function sayHello() {
-  socket.send("Hello from robot");
-}
+});

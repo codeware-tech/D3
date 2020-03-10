@@ -347,10 +347,11 @@ async function handleVideoOfferMsg(msg) {
 
   await pc.setLocalDescription(await pc.createAnswer());
 
-  sendToServer({
-    type: "answer",
-    sdp: pc.localDescription
-  });
+  // sendToServer({
+  //   type: "answer",
+  //   sdp: pc.localDescription
+  // });
+  sendToServer(pc.localDescription);
 }
 
 
