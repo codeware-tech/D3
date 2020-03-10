@@ -9,17 +9,18 @@ var socket = new WebSocket("wss://" + window.location.hostname);
 socket.onopen = function(event) { log("Connected"); };
 socket.onclose = function(event) { log("Disconnected"); };
 socket.onmessage = function(event) {
-  log(event.data);
-  
   var signal = null;
   try {
     signal = JSON.parse(event.data);
-  } catch (e) { }
+  } catch (e) {
+    log(event.data);
+  }
 
   if (signal) {
     switch (signal.type) {
 
       case "startCall":
+        log("startCall");
         DRDoubleSDK.sendCommand("webrtc.enable");
         DRDoubleSDK.sendCommand("camera.enable", { template: "h264ForWebRTC" });
         window.setTimeout(() => {
@@ -28,11 +29,13 @@ socket.onmessage = function(event) {
         break;
 
       case "endCall":
+        log("endCall");
         DRDoubleSDK.sendCommand("camera.disable");
         DRDoubleSDK.sendCommand("webrtc.disable");
         break;
 
       default:
+        log("Received signal");
         DRDoubleSDK.sendCommand("webrtc.signal", signal);
         break;
     }
@@ -72,7 +75,6 @@ DRDoubleSDK.on("event", (message) => {
 	switch (message.class + "." + message.key) {
 
     case "DRWebRTC.signal":
-      log("Sending: "+ JSON.stringify(message.data));
       sendToServer(message.data);
       break;
 

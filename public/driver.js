@@ -13,13 +13,27 @@ var socket = new WebSocket("wss://" + window.location.hostname);
 socket.onopen = function(event) { log("Connected"); };
 socket.onclose = function(event) { log("Disconnected"); };
 socket.onmessage = function(event) {
-  log(event.data);
-  var parsed = null;
+  var signal = null;
   try {
-    parsed = JSON.parse(event.data);
-  } catch (e) { }
-  if (parsed) {
-    processSignal(parsed);
+    signal = JSON.parse(event.data);
+  } catch (e) {
+    log(event.data);
+  }
+
+  if (signal) {
+    switch (signal.type) {
+      case "offer":  // Invitation and offer to chat
+        handleVideoOfferMsg(signal);
+        break;
+
+      case "answer":  // Callee has answered our offer
+        handleVideoAnswerMsg(signal);
+        break;
+
+      case "candidate": // A new ICE candidate has been received
+        handleNewICECandidateMsg(signal);
+        break;
+    }
   }
 };
 
@@ -56,22 +70,6 @@ function startCall() {
     servers: iceConfig.iceServers,
     transportPolicy: iceConfig.iceTransportPolicy
   });
-}
-
-function processSignal(msg) {
-  switch (msg.type) {
-    case "offer":  // Invitation and offer to chat
-      handleVideoOfferMsg(msg);
-      break;
-
-    case "answer":  // Callee has answered our offer
-      handleVideoAnswerMsg(msg);
-      break;
-
-    case "candidate": // A new ICE candidate has been received
-      handleNewICECandidateMsg(msg);
-      break;
-  }
 }
 
 // Create the RTCPeerConnection which knows how to talk to our
@@ -151,6 +149,7 @@ async function handleNegotiationNeededEvent() {
 function handleTrackEvent(event) {
   log("*** Track event");
   document.getElementById("remoteVideo").srcObject = event.streams[0];
+  document.getElementById("remoteVideo").controls = true;
   // document.getElementById("hangup").disabled = false;
 }
 
