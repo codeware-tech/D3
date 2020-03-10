@@ -68,3 +68,4 @@ function startWebcam() {
       log("A webcam is required to start a call. Please allow a webcam by clicking on the camera icon in your browser's toolbar, then refresh the page and try again.");
     });
 }
+
