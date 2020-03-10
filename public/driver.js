@@ -29,7 +29,7 @@ var constraints = {
   audio: true,
   video: { width: 640, height: 480, frameRate: 30 }
 };
-var publisherMediaStream = null;
+var webcamStream = null;
 var pc = null;
 var transceiver = null;
 
@@ -46,7 +46,7 @@ function startWebcam() {
         video.onloadedmetadata = function(e) {
           video.play();
         };
-        publisherMediaStream = mediaStream;
+        webcamStream = mediaStream;
 
 //         this.createPeerConnection();
 
@@ -120,18 +120,9 @@ async function createPeerConnection() {
         credential: "open"
       }
     ]
-    
-    iceServers: [     // Information about ICE servers - Use your own!
-      {
-        urls: "turn:" + myHostname,  // A TURN server
-        username: "webrtc",
-        credential: "turnserver"
-      }
-    ]
   });
 
   // Set up event handlers for the ICE negotiation process.
-
   pc.onicecandidate = handleICECandidateEvent;
   pc.oniceconnectionstatechange = handleICEConnectionStateChangeEvent;
   pc.onicegatheringstatechange = handleICEGatheringStateChangeEvent;
@@ -169,14 +160,11 @@ async function handleNegotiationNeededEvent() {
 
     log("---> Sending the offer to the remote peer");
     sendToServer({
-      name: myUsername,
-      target: targetUsername,
       type: "video-offer",
       sdp: pc.localDescription
     });
   } catch(err) {
-    log("*** The following error occurred while handling the negotiationneeded event:");
-    reportError(err);
+    log("*** The following error occurred while handling the negotiationneeded event: "+ err.message);
   };
 }
 
@@ -196,8 +184,8 @@ async function handleNegotiationNeededEvent() {
 
 function handleTrackEvent(event) {
   log("*** Track event");
-  document.getElementById("received_video").srcObject = event.streams[0];
-  document.getElementById("hangup-button").disabled = false;
+  document.getElementById("remoteVideo").srcObject = event.streams[0];
+  document.getElementById("hangup").disabled = false;
 }
 
 // Handles |icecandidate| events by forwarding the specified
@@ -210,7 +198,6 @@ function handleICECandidateEvent(event) {
 
     sendToServer({
       type: "new-ice-candidate",
-      target: targetUsername,
       candidate: event.candidate
     });
   }
@@ -261,4 +248,84 @@ function handleSignalingStateChangeEvent(event) {
 
 function handleICEGatheringStateChangeEvent(event) {
   log("*** ICE gathering state changed to: " + pc.iceGatheringState);
+}
+
+// Close the RTCPeerConnection and reset variables so that the user can
+// make or receive another call if they wish. This is called both
+// when the user hangs up, the other user hangs up, or if a connection
+// failure is detected.
+
+function closeVideoCall() {
+  var localVideo = document.getElementById("localVideo");
+
+  log("Closing the call");
+
+  // Close the RTCPeerConnection
+
+  if (pc) {
+    log("--> Closing the peer connection");
+
+    // Disconnect all our event listeners; we don't want stray events
+    // to interfere with the hangup while it's ongoing.
+
+    pc.ontrack = null;
+    pc.onnicecandidate = null;
+    pc.oniceconnectionstatechange = null;
+    pc.onsignalingstatechange = null;
+    pc.onicegatheringstatechange = null;
+    pc.onnotificationneeded = null;
+
+    // Stop all transceivers on the connection
+
+    pc.getTransceivers().forEach(transceiver => {
+      transceiver.stop();
+    });
+
+    // Stop the webcam preview as well by pausing the <video>
+    // element, then stopping each of the getUserMedia() tracks
+    // on it.
+
+    if (localVideo.srcObject) {
+      localVideo.pause();
+      localVideo.srcObject.getTracks().forEach(track => {
+        track.stop();
+      });
+    }
+
+    // Close the peer connection
+
+    pc.close();
+    pc = null;
+    webcamStream = null;
+  }
+
+  // Disable the hangup button
+
+  document.getElementById("hangup-button").disabled = true;
+  targetUsername = null;
+}
+
+// Handle the "hang-up" message, which is sent if the other peer
+// has hung up the call or otherwise disconnected.
+
+function handleHangUpMsg(msg) {
+  log("*** Received hang up notification from other peer");
+
+  closeVideoCall();
+}
+
+// Hang up the call by closing our end of the connection, then
+// sending a "hang-up" message to the other peer (keep in mind that
+// the signaling is done on a different connection). This notifies
+// the other peer that the connection should be terminated and the UI
+// returned to the "no call in progress" state.
+
+function hangUpCall() {
+  closeVideoCall();
+
+  sendToServer({
+    name: myUsername,
+    target: targetUsername,
+    type: "hang-up"
+  });
 }
