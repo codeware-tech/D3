@@ -52,6 +52,13 @@ window.sendToServer = (message) => {
 var cameras = document.getElementById("cameras");
 var mics = document.getElementById("mics");
 var localVideo = document.getElementById("localVideo");
+var urlBox = document.getElementById("urlBox");
+
+if (window.location.host == "d3-webrtc-example.glitch.me") {
+  urlBox.value = "Do step 1 first!";
+} else {
+  urlBox.value = "https://"+ window.location.host +"/robot";
+}
 
 window.listWebcams = () => {
   window.endLocalVideo();

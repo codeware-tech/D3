@@ -24,7 +24,8 @@
         <video id="remoteVideo" autoplay muted style="width: 480px;"></video>
       </div>
       <ol>
-        <li>Remix this on Glitch, so you create your own app. Loading the shared version (<a href="https://d3-webrtc-example.glitch.me">d3-webrtc-example.glitch.me</a>) onto your robot will expose your robot to anyone else who loads this page!</li>
+        <li><a href="https://glitch.com/edit/#!/remix/d3-webrtc-example">Remix this on Glitch</a>, so you create your own app. Loading the shared version (<a href="https://d3-webrtc-example.glitch.me">d3-webrtc-example.glitch.me</a>) onto your robot will expose your robot to anyone else who loads this page!</li>
+        <li>Click "Show" at the top of your Glitch editor.</li>
         <li>
           <input type="button" value="List Webcams" onclick="listWebcams()">
           <select id="cameras" onchange="updateLocalVideo()"></select>
@@ -32,8 +33,8 @@
           <input type="button" value="Clear" onclick="endLocalVideo()">
         </li>
         <li>
-          Open on the robot GUI: https://<span style="color: #EE0000;">your-app-name</span>.glitch.me/robot
-          <!-- <input type="text" value="https://d3-webrtc-example.glitch.me/robot" size="50"> -->
+          Open on the robot GUI: <!-- https://<span style="color: #EE0000;">$PROJECT_NAME</span>.glitch.me/robot -->
+          <input type="text" value="" size="50" id="urlBox">
         </li>
         <li>
           <input type="button" value="Call" onclick="startCall()">
