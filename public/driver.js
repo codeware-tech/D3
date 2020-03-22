@@ -43,7 +43,7 @@ socket.onmessage = function(event) {
   }
 };
 
-window.sendToServer = function (message) {
+window.sendToServer = (message) => {
   socket.send(JSON.stringify(message));
 }
 

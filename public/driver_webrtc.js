@@ -3,14 +3,17 @@
 export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
 
   var pc = null;
-
+  var localVideo = document.getElementById("localVideo");
+  var remoteVideo = document.getElementById("remoteVideo");
+  var webcamStream = null;
+  
   this.handleVideoOffer = async (msg) => {
     log("Received call offer");
 
-    var webcamStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+    webcamStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
     this.createPeerConnection();
     webcamStream.getTracks().forEach(track => pc.addTrack(track, webcamStream));
-    document.getElementById("localVideo").srcObject = webcamStream;
+    localVideo.srcObject = webcamStream;
 
     var desc = new RTCSessionDescription(msg);
     await pc.setRemoteDescription(desc);
@@ -62,8 +65,8 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
 
     pc.ontrack = (event) => {
       log("*** Track event");
-      document.getElementById("remoteVideo").srcObject = event.streams[0];
-      document.getElementById("remoteVideo").controls = true;
+      remoteVideo.srcObject = event.streams[0];
+      remoteVideo.controls = true;
     };
 
     // pc.onnegotiationneeded = handleNegotiationNeededEvent;
@@ -124,9 +127,15 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
       pc.onicegatheringstatechange = null;
       pc.onnotificationneeded = null;
 
-      pc.getTracks().forEach(track => { track.stop(); });
-
-      var localVideo = document.getElementById("localVideo");
+      // pc.getTracks().forEach(track => { track.stop(); });
+      pc.getSenders().forEach((track) => {
+        pc.removeTrack(track);
+        track.stop();
+      });
+      if (webcamStream) {
+        
+      }
+      
       if (localVideo.srcObject) {
         localVideo.pause();
         localVideo.srcObject.getTracks().forEach(track => { track.stop(); });
