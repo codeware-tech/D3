@@ -5,12 +5,13 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
   var pc = null;
   var localVideo = document.getElementById("localVideo");
   var remoteVideo = document.getElementById("remoteVideo");
-  var webcamStream = null;
   
   this.handleVideoOffer = async (msg) => {
     log("Received call offer");
 
-    webcamStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+    if (!localVideo.srcObject) {
+      localVideo.srcObject = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+    }
 
     pc = new RTCPeerConnection(iceConfig);
     pc.onicecandidate = (event) => this.onicecandidate(event);
@@ -20,8 +21,7 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
     pc.ontrack = (event) => this.ontrack(event);
     // pc.onnegotiationneeded = () => this.onnegotiationneeded();
     
-    webcamStream.getTracks().forEach(track => pc.addTrack(track, webcamStream));
-    localVideo.srcObject = webcamStream;
+    localVideo.srcObject.getTracks().forEach(track => pc.addTrack(track, localVideo.srcObject));
 
     var desc = new RTCSessionDescription(msg);
     await pc.setRemoteDescription(desc);
@@ -88,11 +88,11 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
 
       pc.getSenders().forEach(track => { pc.removeTrack(track); });
       
-      if (localVideo.srcObject) {
-        localVideo.pause();
-        localVideo.srcObject.getTracks().forEach(track => { track.stop(); });
-        localVideo.srcObject = null;
-      }
+      // if (localVideo.srcObject) {
+      //   localVideo.pause();
+      //   localVideo.srcObject.getTracks().forEach(track => { track.stop(); });
+      //   localVideo.srcObject = null;
+      // }
 
       if (remoteVideo) {
         remoteVideo.srcObject = null;
@@ -101,7 +101,6 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
       
       pc.close();
       pc = null;
-      webcamStream = null;
     }
   }
 

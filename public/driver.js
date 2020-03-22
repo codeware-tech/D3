@@ -49,30 +49,50 @@ window.sendToServer = (message) => {
 
 // User Interface
 
+var cameras = document.getElementById("cameras");
+var mics = document.getElementById("mics");
+var localVideo = document.getElementById("localVideo");
+
 window.listWebcams = () => {
-  var cameras = document.getElementById("cameras");
-  var mics = document.getElementById("mics");
   cameras.innerHtml = "";
   mics.innerHtml = "";
   
   navigator.mediaDevices.enumerateDevices()
-  .then(function(devices) {
+  .then(function (devices) {
     devices.forEach(function(device) {
       console.log(device.kind + ": " + device.label +" id = " + device.deviceId);
       var option = document.createElement("option");
       option.value = device.deviceId;
       option.innerText = device.label;
-      if (device.kind == "video") {
+      if (device.kind == "videoinput") {
         cameras.appendChild(option);
-      } else if (device.kind == "audio") {
+      } else if (device.kind == "audioinput") {
         mics.appendChild(option);
       }
     });
+    
+    window.updateLocalVideo();
   })
   .catch(function(err) {
     console.log(err.name + ": " + err.message);
   });
 };
+
+window.endLocalVideo = () => {
+//   localVideo.pause();
+//   localVideo.srcObject.getTracks().forEach(track => { track.stop(); });
+//   localVideo.srcObject = null;
+}
+
+window.updateLocalVideo = () => {
+  navigator.mediaDevices.getUserMedia({
+    audio: { deviceId: mics.value },
+    video: { deviceId: cameras.value }
+  })
+  .then(function (stream) {
+    localVideo.srcObject = stream;
+  });
+}
 
 window.startCall = () => {
   webrtc = new DriverWebRTC(iceConfig, log, window.sendToServer, window.hangUpCall);

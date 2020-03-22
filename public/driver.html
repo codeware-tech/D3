@@ -26,7 +26,7 @@
       <input type="button" value="Hello to Robot" onclick="sendToServer('Hello from driver')">
       <br>
       <input type="button" value="List Webcams" onclick="listWebcams()">
-      <select id="cameras"></select>
+      <select id="cameras" onchange="updateLocalVideo()"></select>
       <select id="mics"></select>
       <br>
       <input type="button" value="Call" onclick="startCall()">
