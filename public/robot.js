@@ -17,9 +17,8 @@ socket.onmessage = function(event) {
   }
 
   if (signal) {
-    // Note: DO NOT pass 
+    // Note: DO NOT pass DRDoubleSDK commands directy from your driver or you will be opening a massive security hole to your robot. You should use your own command structure for your signaling server, then hard-code commands for the DRDoubleSDK on the robot side - just like we're doing right here.
     switch (signal.type) {
-
       case "startCall":
         log("startCall");
         DRDoubleSDK.sendCommand("webrtc.enable");
