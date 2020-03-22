@@ -293,6 +293,16 @@ async function handleVideoOfferMsg(msg) {
   // to be linked to the caller.
 
   log("Received call offer");
+
+  if (!webcamStream) {
+  try {
+    webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
+  } catch(err) {
+    handleGetUserMediaError(err);
+    return;
+  }
+  document.getElementById("localVideo").srcObject = webcamStream;
+  
   if (!pc) {
     createPeerConnection();
   }
@@ -321,16 +331,7 @@ async function handleVideoOfferMsg(msg) {
 
   // Get the webcam stream if we don't already have it
 
-  if (!webcamStream) {
-    try {
-      webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
-    } catch(err) {
-      handleGetUserMediaError(err);
-      return;
-    }
-
-    document.getElementById("localVideo").srcObject = webcamStream;
-
+  if (webcamStream) {
     // Add the camera stream to the RTCPeerConnection
 
     try {
