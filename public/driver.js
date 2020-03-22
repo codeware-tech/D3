@@ -1,9 +1,6 @@
-// import {test} from './driver_webrtc.js';
-import('./driver_webrtc.js').then(({ test }) => {
-  // your code
-});
+import { DriverWebRTC } from './driver_webrtc.js';
 
-// Log
+var webrtc = null;
 
 var logs = document.querySelector("#logs");
 function log(text) {
@@ -24,17 +21,17 @@ socket.onmessage = function(event) {
   try {
     signal = JSON.parse(event.data);
   } catch (e) {
-    log(event.data);
+    console.error(e);
   }
 
   if (signal) {
     switch (signal.type) {
       case "offer":
-        handleVideoOffer(signal);
+        webrtc.handleVideoOffer(signal);
         break;
 
       case "candidate":
-        handleCandidate(signal.candidate);
+        webrtc.handleCandidate(signal.candidate);
         break;
     }
   }
@@ -47,14 +44,15 @@ function sendToServer(message) {
 // User Interface
 
 function startCall() {
+  webrtc = new DriverWebRTC(log, hangUpCall);
   sendToServer({
     type: "startCall",
-    servers: iceConfig.iceServers,
-    transportPolicy: iceConfig.iceTransportPolicy
+    servers: webrtc.iceConfig.iceServers,
+    transportPolicy: webrtc.iceConfig.iceTransportPolicy
   });
 }
 
 function hangUpCall() {
-  closeVideoCall();
+  webrtc.closeVideoCall();
   sendToServer({ type: "endCall" });
 }
