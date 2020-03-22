@@ -29,7 +29,6 @@ input {
   border: 1px solid silver;
   display: inline;
   font-size: 16px;
-  margin-bottom: 10px;
   padding: 5px 10px;
   width: auto;
 }
@@ -51,6 +50,10 @@ form button {
 
 form button:hover {
   background-color: lavender;
+}
+
+ol li {
+  margin-bottom: 14px;
 }
 
 footer {

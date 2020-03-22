@@ -23,14 +23,23 @@
         <video id="localVideo" autoplay muted></video>
         <video id="remoteVideo" autoplay muted style="width: 480px;"></video>
       </div>
-      <input type="button" value="List Webcams" onclick="listWebcams()">
-      <select id="cameras" onchange="updateLocalVideo()"></select>
-      <select id="mics" onchange="updateLocalVideo()"></select>
-      <input type="button" value="Clear" onclick="endLocalVideo()">
-      <p>Open on the robot GUI: <input type="text" value="https://d3-webrtc-example.glitch.me/robot" size="40"></p>
-      <input type="button" value="Call" onclick="startCall()">
-      <input type="button" value="Hang Up" onclick="hangUpCall()">
-      <br><br>
+      <ol>
+        <li>Remix this on Glitch, so you create your own app. Loading the shared version (<a href="https://d3-webrtc-example.glitch.me">d3-webrtc-example.glitch.me</a>) onto your robot will expose your robot to anyone else who loads this page!</li>
+        <li>
+          <input type="button" value="List Webcams" onclick="listWebcams()">
+          <select id="cameras" onchange="updateLocalVideo()"></select>
+          <select id="mics" onchange="updateLocalVideo()"></select>
+          <input type="button" value="Clear" onclick="endLocalVideo()">
+        </li>
+        <li>
+          Open on the robot GUI: https://<span style="color: #EE0000;">your-app-name</span>.glitch.me/robot
+          <!-- <input type="text" value="https://d3-webrtc-example.glitch.me/robot" size="50"> -->
+        </li>
+        <li>
+          <input type="button" value="Call" onclick="startCall()">
+          <input type="button" value="Hang Up" onclick="hangUpCall()">
+        </li>
+      </ol>
       <div id="logs"></div>
     </main>
     

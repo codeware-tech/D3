@@ -42,12 +42,11 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
     if (pc) {
       log("Closing the peer connection");
 
-      pc.ontrack = null;
-      pc.onnicecandidate = null;
+      pc.onicecandidate = null;
       pc.oniceconnectionstatechange = null;
-      pc.onsignalingstatechange = null;
       pc.onicegatheringstatechange = null;
-      pc.onnotificationneeded = null;
+      pc.onsignalingstatechange = null;
+      pc.ontrack = null;
 
       pc.getSenders().forEach(track => { pc.removeTrack(track); });
       
