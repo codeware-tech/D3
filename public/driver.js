@@ -61,7 +61,6 @@ function hangUpCall() {
 // WebRTC
 
 var pc = null;
-var transceiver = null;
 var iceConfig = {
   sdpSemantics: "unified-plan",
   iceTransportPolicy: "all",
@@ -77,6 +76,23 @@ var iceConfig = {
     }
   ]
 };
+
+async function handleVideoOffer(msg) {
+  log("Received call offer");
+
+  createPeerConnection();
+
+  var webcamStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+  webcamStream.getTracks().forEach(track => pc.addTrack(track, webcamStream));
+  document.getElementById("localVideo").srcObject = webcamStream;
+
+  var desc = new RTCSessionDescription(msg);
+  await pc.setRemoteDescription(desc);
+  await pc.setLocalDescription(await pc.createAnswer());
+  sendToServer(pc.localDescription);
+
+  log("Sending SDP answer");
+}
 
 async function createPeerConnection() {
   log("Creating peer connection");
@@ -100,7 +116,7 @@ async function createPeerConnection() {
       case "closed":
       case "failed":
       case "disconnected":
-        closeVideoCall();
+        hangUpCall();
         break;
     }
   };
@@ -113,7 +129,7 @@ async function createPeerConnection() {
     log("*** WebRTC signaling state changed to: " + pc.signalingState);
     switch(pc.signalingState) {
       case "closed":
-        closeVideoCall();
+        hangUpCall();
         break;
     }
   };
@@ -125,6 +141,12 @@ async function createPeerConnection() {
   };
 
   // pc.onnegotiationneeded = handleNegotiationNeededEvent;
+}
+
+function handleCandidate(candidate) {
+  var candidate = new RTCIceCandidate(candidate);
+  log("Adding received ICE candidate: " + JSON.stringify(candidate));
+  pc.addIceCandidate(candidate);
 }
 
 // Called by the WebRTC layer to let us know when it's time to begin, resume, or restart ICE negotiation.
@@ -164,7 +186,6 @@ async function createPeerConnection() {
 // }
 
 function closeVideoCall() {
-  var localVideo = document.getElementById("localVideo");
   log("Closing the call");
 
   if (pc) {
@@ -177,15 +198,12 @@ function closeVideoCall() {
     pc.onicegatheringstatechange = null;
     pc.onnotificationneeded = null;
 
-    pc.getTransceivers().forEach(transceiver => {
-      transceiver.stop();
-    });
+    pc.getTracks().forEach(track => { track.stop(); });
 
+    var localVideo = document.getElementById("localVideo");
     if (localVideo.srcObject) {
       localVideo.pause();
-      localVideo.srcObject.getTracks().forEach(track => {
-        track.stop();
-      });
+      localVideo.srcObject.getTracks().forEach(track => { track.stop(); });
     }
 
     pc.close();
@@ -207,5 +225,5 @@ function handleGetUserMediaError(e) {
       alert("Error opening your camera and/or microphone: " + e.message);
       break;
   }
-  closeVideoCall();
+  hangUpCall();
 }
