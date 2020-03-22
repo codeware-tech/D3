@@ -68,3 +68,8 @@ footer {
   margin-right: 15px;
   width: 400px;
 }
+
+#logs div {
+  sfont-family: monospace;
+  white-space: pre;
+}

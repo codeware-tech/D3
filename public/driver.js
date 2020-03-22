@@ -284,6 +284,17 @@ function hangUpCall() {
   });
 }
 
+async function startWebcam() {
+  try {
+    webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
+  } catch(err) {
+    handleGetUserMediaError(err);
+    return;
+  }
+  document.getElementById("localVideo").srcObject = webcamStream;
+  log("Got webcam stream");
+}
+
 // Accept an offer to video chat. We configure our local settings,
 // create our RTCPeerConnection, get and attach our local camera
 // stream, then create and send an answer to the caller.
@@ -295,13 +306,8 @@ async function handleVideoOfferMsg(msg) {
   log("Received call offer");
 
   if (!webcamStream) {
-  try {
-    webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
-  } catch(err) {
-    handleGetUserMediaError(err);
-    return;
+    await startWebcam();
   }
-  document.getElementById("localVideo").srcObject = webcamStream;
   
   if (!pc) {
     createPeerConnection();
@@ -333,7 +339,6 @@ async function handleVideoOfferMsg(msg) {
 
   if (webcamStream) {
     // Add the camera stream to the RTCPeerConnection
-
     try {
       webcamStream.getTracks().forEach(
         transceiver = track => pc.addTransceiver(track, {streams: [webcamStream]})
@@ -347,6 +352,8 @@ async function handleVideoOfferMsg(msg) {
 
   await pc.setLocalDescription(await pc.createAnswer());
 
+  log("answer:\n"+ pc.localDescription.sdp);
+  
   // sendToServer({
   //   type: "answer",
   //   sdp: pc.localDescription
