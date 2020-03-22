@@ -45,9 +45,34 @@ socket.onmessage = function(event) {
 
 window.sendToServer = (message) => {
   socket.send(JSON.stringify(message));
-}
+};
 
 // User Interface
+
+window.listWebcams = () => {
+  var cameras = document.getElementById("cameras");
+  var mics = document.getElementById("mics");
+  cameras.innerHtml = "";
+  mics.innerHtml = "";
+  
+  navigator.mediaDevices.enumerateDevices()
+  .then(function(devices) {
+    devices.forEach(function(device) {
+      console.log(device.kind + ": " + device.label +" id = " + device.deviceId);
+      var option = document.createElement("option");
+      option.value = device.deviceId;
+      option.innerText = device.label;
+      if (device.kind == "video") {
+        cameras.appendChild(option);
+      } else if (device.kind == "audio") {
+        mics.appendChild(option);
+      }
+    });
+  })
+  .catch(function(err) {
+    console.log(err.name + ": " + err.message);
+  });
+};
 
 window.startCall = () => {
   webrtc = new DriverWebRTC(iceConfig, log, window.sendToServer, window.hangUpCall);
@@ -56,12 +81,12 @@ window.startCall = () => {
     servers: iceConfig.iceServers,
     transportPolicy: iceConfig.iceTransportPolicy
   });
-}
+};
 
 window.hangUpCall = () => {
   webrtc.closeVideoCall();
   window.sendToServer({ type: "endCall" });
-}
+};
 
 // Log
 

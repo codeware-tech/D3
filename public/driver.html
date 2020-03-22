@@ -23,9 +23,14 @@
         <video id="localVideo" autoplay muted></video>
         <video id="remoteVideo" autoplay muted style="width: 480px;"></video>
       </div>
-      <input type="button" value="Say Hello" onclick="sendToServer('Hello from driver')">
-      <input type="button" value="Call" onclick="startCall()" id="start">
-      <input type="button" value="Hang Up" onclick="hangUpCall()" id="hangup">
+      <input type="button" value="Hello to Robot" onclick="sendToServer('Hello from driver')">
+      <br>
+      <input type="button" value="List Webcams" onclick="listWebcams()">
+      <select id="cameras"></select>
+      <select id="mics"></select>
+      <br>
+      <input type="button" value="Call" onclick="startCall()">
+      <input type="button" value="Hang Up" onclick="hangUpCall()">
       <div id="logs"></div>
     </main>
     
