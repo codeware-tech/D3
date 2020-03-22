@@ -19,7 +19,6 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
     pc.onicegatheringstatechange = () => this.onicegatheringstatechange();
     pc.onsignalingstatechange = () => this.onsignalingstatechange();
     pc.ontrack = (event) => this.ontrack(event);
-    // pc.onnegotiationneeded = () => this.onnegotiationneeded();
     
     localVideo.srcObject.getTracks().forEach(track => pc.addTrack(track, localVideo.srcObject));
 
@@ -37,42 +36,6 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
     pc.addIceCandidate(candidate);
   }
 
-  // Called by the WebRTC layer to let us know when it's time to begin, resume, or restart ICE negotiation.
-
-  // async function onnegotiationneeded() {
-  //   log("Negotiation needed");
-
-  //   try {
-  //     log("---> Creating offer");
-  //     const offer = await pc.createOffer();
-
-  //     // If the connection hasn't yet achieved the "stable" state,
-  //     // return to the caller. Another negotiationneeded event
-  //     // will be fired when the state stabilizes.
-
-  //     if (pc.signalingState != "stable") {
-  //       log("     -- The connection isn't stable yet; postponing...")
-  //       return;
-  //     }
-
-  //     // Establish the offer as the local peer's current
-  //     // description.
-
-  //     log("---> Setting local description to the offer");
-  //     await pc.setLocalDescription(offer);
-
-  //     // Send the offer to the remote peer.
-
-  //     log("---> Sending the offer to the remote peer");
-  //     sendToServer({
-  //       type: "offer",
-  //       sdp: pc.localDescription
-  //     });
-  //   } catch(err) {
-  //     log("The following error occurred while handling the negotiationneeded event: "+ err.message);
-  //   };
-  // }
-
   this.closeVideoCall = () => {
     log("Closing the call");
 
@@ -88,12 +51,6 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
 
       pc.getSenders().forEach(track => { pc.removeTrack(track); });
       
-      // if (localVideo.srcObject) {
-      //   localVideo.pause();
-      //   localVideo.srcObject.getTracks().forEach(track => { track.stop(); });
-      //   localVideo.srcObject = null;
-      // }
-
       if (remoteVideo) {
         remoteVideo.srcObject = null;
         remoteVideo.controls = false;
@@ -104,11 +61,6 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
     }
   }
 
-  this.updateLocalVideo = () => {
-    pc.getSenders().forEach(track => { pc.removeTrack(track); });
-    localVideo.srcObject.getTracks().forEach(track => pc.addTrack(track, localVideo.srcObject));
-  }
-  
   // this.handleGetUserMediaError = (e) => {
   //   log(e.name);
   //   switch(e.name) {

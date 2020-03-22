@@ -20,8 +20,8 @@ var iceConfig = {
 // WebSocket
 
 var socket = new WebSocket("wss://" + window.location.hostname);
-socket.onopen = function(event) { log("Connected"); };
-socket.onclose = function(event) { log("Disconnected"); };
+socket.onopen = function(event) { log("Connected to server"); };
+socket.onclose = function(event) { log("Disconnected from server"); };
 socket.onmessage = function(event) {
   var signal = null;
   try {
@@ -76,15 +76,22 @@ window.listWebcams = () => {
   });
 };
 
-window.endLocalVideo = () => {
+function clearWebcams() {
   cameras.innerHTML = "";
   mics.innerHTML = "";
+}
 
+function stopLocalVideo() {
   if (localVideo.srcObject) {
     localVideo.pause();
     localVideo.srcObject.getTracks().forEach(track => { track.stop(); });
     localVideo.srcObject = null;
   }
+}
+
+window.endLocalVideo = () => {
+  clearWebcams();
+  stopLocalVideo();
 }
 
 window.updateLocalVideo = () => {
@@ -93,11 +100,8 @@ window.updateLocalVideo = () => {
     video: { deviceId: cameras.value }
   })
   .then(function (stream) {
+    stopLocalVideo();
     localVideo.srcObject = stream;
-    
-    if (webrtc) {
-      webrtc.updateLocalVideo();
-    }
   });
 }
 
@@ -108,10 +112,12 @@ window.startCall = () => {
     servers: iceConfig.iceServers,
     transportPolicy: iceConfig.iceTransportPolicy
   });
+  clearWebcams();
 };
 
 window.hangUpCall = () => {
   webrtc.closeVideoCall();
+  window.endLocalVideo();
   window.sendToServer({ type: "endCall" });
 };
 

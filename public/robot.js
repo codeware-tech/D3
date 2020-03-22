@@ -6,8 +6,8 @@ function log(text) {
 }
 
 var socket = new WebSocket("wss://" + window.location.hostname);
-socket.onopen = function(event) { log("Connected"); };
-socket.onclose = function(event) { log("Disconnected"); };
+socket.onopen = function(event) { log("Connected to server"); };
+socket.onclose = function(event) { log("Disconnected from server"); };
 socket.onmessage = function(event) {
   var signal = null;
   try {

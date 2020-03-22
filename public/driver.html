@@ -15,7 +15,7 @@
   <body>
     <header>
       <h1>D3 WebRTC Example: Driver</h1>
-      <p>Open on the robot GUI: <input type="text" value="https://d3-webrtc-example.glitch.me/robot" size="40"></p>
+<!--       <input type="button" value="Hello to Robot" onclick="sendToServer('Hello from driver')"> -->
     </header>
 
     <main>
@@ -23,15 +23,14 @@
         <video id="localVideo" autoplay muted></video>
         <video id="remoteVideo" autoplay muted style="width: 480px;"></video>
       </div>
-      <input type="button" value="Hello to Robot" onclick="sendToServer('Hello from driver')">
-      <br>
       <input type="button" value="List Webcams" onclick="listWebcams()">
       <select id="cameras" onchange="updateLocalVideo()"></select>
       <select id="mics" onchange="updateLocalVideo()"></select>
       <input type="button" value="Clear" onclick="endLocalVideo()">
-      <br>
+      <p>Open on the robot GUI: <input type="text" value="https://d3-webrtc-example.glitch.me/robot" size="40"></p>
       <input type="button" value="Call" onclick="startCall()">
       <input type="button" value="Hang Up" onclick="hangUpCall()">
+      <br><br>
       <div id="logs"></div>
     </main>
     
