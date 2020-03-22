@@ -127,22 +127,22 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
       pc.onicegatheringstatechange = null;
       pc.onnotificationneeded = null;
 
-      // pc.getTracks().forEach(track => { track.stop(); });
-      pc.getSenders().forEach((track) => {
-        pc.removeTrack(track);
-        track.stop();
-      });
-      if (webcamStream) {
-        
-      }
+      pc.getSenders().forEach(track => { pc.removeTrack(track); });
       
       if (localVideo.srcObject) {
         localVideo.pause();
         localVideo.srcObject.getTracks().forEach(track => { track.stop(); });
+        localVideo.srcObject = null;
       }
 
+      if (remoteVideo) {
+        remoteVideo.srcObject = null;
+        remoteVideo.controls = false;
+      }
+      
       pc.close();
       pc = null;
+      webcamStream = null;
     }
   }
 
