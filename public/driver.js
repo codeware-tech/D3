@@ -42,8 +42,6 @@ function sendToServer(message) {
 // User Interface
 
 function startCall() {
-  document.getElementById("hangup").disabled = false;
-  document.getElementById("start").disabled = true;
   sendToServer({
     type: "startCall",
     servers: iceConfig.iceServers,
@@ -54,8 +52,6 @@ function startCall() {
 function hangUpCall() {
   closeVideoCall();
   sendToServer({ type: "endCall" });
-  document.getElementById("hangup").disabled = true;
-  document.getElementById("start").disabled = false;
 }
 
 // WebRTC
