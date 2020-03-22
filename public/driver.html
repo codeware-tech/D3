@@ -27,7 +27,8 @@
       <br>
       <input type="button" value="List Webcams" onclick="listWebcams()">
       <select id="cameras" onchange="updateLocalVideo()"></select>
-      <select id="mics"></select>
+      <select id="mics" onchange="updateLocalVideo()"></select>
+      <input type="button" value="Clear" onclick="endLocalVideo()">
       <br>
       <input type="button" value="Call" onclick="startCall()">
       <input type="button" value="Hang Up" onclick="hangUpCall()">

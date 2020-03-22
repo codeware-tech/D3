@@ -54,13 +54,11 @@ var mics = document.getElementById("mics");
 var localVideo = document.getElementById("localVideo");
 
 window.listWebcams = () => {
-  cameras.innerHtml = "";
-  mics.innerHtml = "";
+  window.endLocalVideo();
   
   navigator.mediaDevices.enumerateDevices()
   .then(function (devices) {
     devices.forEach(function(device) {
-      console.log(device.kind + ": " + device.label +" id = " + device.deviceId);
       var option = document.createElement("option");
       option.value = device.deviceId;
       option.innerText = device.label;
@@ -79,9 +77,14 @@ window.listWebcams = () => {
 };
 
 window.endLocalVideo = () => {
-//   localVideo.pause();
-//   localVideo.srcObject.getTracks().forEach(track => { track.stop(); });
-//   localVideo.srcObject = null;
+  cameras.innerHTML = "";
+  mics.innerHTML = "";
+
+  if (localVideo.srcObject) {
+    localVideo.pause();
+    localVideo.srcObject.getTracks().forEach(track => { track.stop(); });
+    localVideo.srcObject = null;
+  }
 }
 
 window.updateLocalVideo = () => {
@@ -91,6 +94,10 @@ window.updateLocalVideo = () => {
   })
   .then(function (stream) {
     localVideo.srcObject = stream;
+    
+    if (webrtc) {
+      webrtc.updateLocalVideo();
+    }
   });
 }
 

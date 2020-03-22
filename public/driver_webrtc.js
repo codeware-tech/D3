@@ -104,6 +104,11 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
     }
   }
 
+  this.updateLocalVideo = () => {
+    pc.getSenders().forEach(track => { pc.removeTrack(track); });
+    localVideo.srcObject.getTracks().forEach(track => pc.addTrack(track, localVideo.srcObject));
+  }
+  
   // this.handleGetUserMediaError = (e) => {
   //   log(e.name);
   //   switch(e.name) {
