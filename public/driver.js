@@ -22,18 +22,12 @@ socket.onmessage = function(event) {
 
   if (signal) {
     switch (signal.type) {
-      case "offer":  // Invitation and offer to chat
-        handleVideoOfferMsg(signal);
+      case "offer":
+        handleVideoOffer(signal);
         break;
 
-      // case "answer":  // Callee has answered our offer
-      //   handleVideoAnswerMsg(signal);
-      //   break;
-
-      case "candidate": // A new ICE candidate has been received
-        var candidate = new RTCIceCandidate(signal.candidate);
-        log("Adding received ICE candidate: " + JSON.stringify(candidate));
-        pc.addIceCandidate(candidate);
+      case "candidate":
+        handleCandidate(signal.candidate);
         break;
     }
   }
@@ -44,6 +38,9 @@ function sendToServer(message) {
 }
 
 // WebRTC
+var webcamStream = null;
+var pc = null;
+var transceiver = null;
 var iceConfig = {
   sdpSemantics: "unified-plan",
   iceTransportPolicy: "all",
@@ -59,9 +56,6 @@ var iceConfig = {
     }
   ]
 };
-var webcamStream = null;
-var pc = null;
-var transceiver = null;
 
 function startCall() {
   sendToServer({
@@ -111,90 +105,57 @@ async function createPeerConnection() {
     }
   };
 
-  pc.onnegotiationneeded = handleNegotiationNeededEvent;
-  pc.ontrack = handleTrackEvent;
-}
-
-// Called by the WebRTC layer to let us know when it's time to
-// begin, resume, or restart ICE negotiation.
-
-async function handleNegotiationNeededEvent() {
-  log("*** Negotiation needed");
-
-  try {
-    log("---> Creating offer");
-    const offer = await pc.createOffer();
-
-    // If the connection hasn't yet achieved the "stable" state,
-    // return to the caller. Another negotiationneeded event
-    // will be fired when the state stabilizes.
-
-    if (pc.signalingState != "stable") {
-      log("     -- The connection isn't stable yet; postponing...")
-      return;
-    }
-
-    // Establish the offer as the local peer's current
-    // description.
-
-    log("---> Setting local description to the offer");
-    await pc.setLocalDescription(offer);
-
-    // Send the offer to the remote peer.
-
-    log("---> Sending the offer to the remote peer");
-    sendToServer({
-      type: "offer",
-      sdp: pc.localDescription
-    });
-  } catch(err) {
-    log("*** The following error occurred while handling the negotiationneeded event: "+ err.message);
+  pc.ontrack = (event) => {
+    log("*** Track event");
+    document.getElementById("remoteVideo").srcObject = event.streams[0];
+    document.getElementById("remoteVideo").controls = true;
   };
+
+  // pc.onnegotiationneeded = handleNegotiationNeededEvent;
 }
 
-function handleTrackEvent(event) {
-  log("*** Track event");
-  document.getElementById("remoteVideo").srcObject = event.streams[0];
-  document.getElementById("remoteVideo").controls = true;
-  // document.getElementById("hangup").disabled = false;
-}
+// Called by the WebRTC layer to let us know when it's time to begin, resume, or restart ICE negotiation.
 
+// async function handleNegotiationNeededEvent() {
+//   log("*** Negotiation needed");
 
-// Handle |iceconnectionstatechange| events. This will detect
-// when the ICE connection is closed, failed, or disconnected.
-//
-// This is called when the state of the ICE agent changes.
+//   try {
+//     log("---> Creating offer");
+//     const offer = await pc.createOffer();
 
-function handleICEConnectionStateChangeEvent(event) {
-  log("*** ICE connection state changed to " + pc.iceConnectionState);
+//     // If the connection hasn't yet achieved the "stable" state,
+//     // return to the caller. Another negotiationneeded event
+//     // will be fired when the state stabilizes.
 
-  switch(pc.iceConnectionState) {
-    case "closed":
-    case "failed":
-    case "disconnected":
-      closeVideoCall();
-      break;
-  }
-}
+//     if (pc.signalingState != "stable") {
+//       log("     -- The connection isn't stable yet; postponing...")
+//       return;
+//     }
 
+//     // Establish the offer as the local peer's current
+//     // description.
 
-// Close the RTCPeerConnection and reset variables so that the user can
-// make or receive another call if they wish. This is called both
-// when the user hangs up, the other user hangs up, or if a connection
-// failure is detected.
+//     log("---> Setting local description to the offer");
+//     await pc.setLocalDescription(offer);
+
+//     // Send the offer to the remote peer.
+
+//     log("---> Sending the offer to the remote peer");
+//     sendToServer({
+//       type: "offer",
+//       sdp: pc.localDescription
+//     });
+//   } catch(err) {
+//     log("*** The following error occurred while handling the negotiationneeded event: "+ err.message);
+//   };
+// }
 
 function closeVideoCall() {
   var localVideo = document.getElementById("localVideo");
-
   log("Closing the call");
 
-  // Close the RTCPeerConnection
-
   if (pc) {
-    log("--> Closing the peer connection");
-
-    // Disconnect all our event listeners; we don't want stray events
-    // to interfere with the hangup while it's ongoing.
+    log("Closing the peer connection");
 
     pc.ontrack = null;
     pc.onnicecandidate = null;
@@ -203,15 +164,9 @@ function closeVideoCall() {
     pc.onicegatheringstatechange = null;
     pc.onnotificationneeded = null;
 
-    // Stop all transceivers on the connection
-
     pc.getTransceivers().forEach(transceiver => {
       transceiver.stop();
     });
-
-    // Stop the webcam preview as well by pausing the <video>
-    // element, then stopping each of the getUserMedia() tracks
-    // on it.
 
     if (localVideo.srcObject) {
       localVideo.pause();
@@ -220,16 +175,13 @@ function closeVideoCall() {
       });
     }
 
-    // Close the peer connection
-
     pc.close();
     pc = null;
     webcamStream = null;
   }
 
-  // Disable the hangup button
-
-  // document.getElementById("hangup-button").disabled = true;
+  document.getElementById("hangup").disabled = true;
+  document.getElementById("start").disabled = false;
 }
 
 function hangUpCall() {
@@ -237,48 +189,32 @@ function hangUpCall() {
   sendToServer({ type: "endCall" });
 }
 
-// Accept an offer to video chat. We configure our local settings,
-// create our RTCPeerConnection, get and attach our local camera
-// stream, then create and send an answer to the caller.
-
-async function handleVideoOfferMsg(msg) {
-  // If we're not already connected, create an RTCPeerConnection
-  // to be linked to the caller.
-
+async function handleVideoOffer(msg) {
   log("Received call offer");
-
-  if (!pc) {
-    createPeerConnection();
-  }
-
+  document.getElementById("hangup").disabled = false;
+  document.getElementById("start").disabled = true;
+  createPeerConnection();
   var desc = new RTCSessionDescription(msg);
-  try {
-    webcamStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-  } catch(err) {
-    handleGetUserMediaError(err);
-    return;
-  }
+  webcamStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
   document.getElementById("localVideo").srcObject = webcamStream;
-
   await pc.setRemoteDescription(desc);
   webcamStream.getTracks().forEach(track => pc.addTrack(track, webcamStream));
   await pc.setLocalDescription(await pc.createAnswer());
+  sendToServer(pc.localDescription);
+  log("Sending SDP answer");
+}
 
-  log("Sending SDP answer:");
-      sendToServer(pc.localDescription);
-
-  // sendToServer({
-  //   type: "answer",
-  //   sdp: pc.localDescription
-  // });
+function handleCandidate(candidate) {
+  var candidate = new RTCIceCandidate(candidate);
+  log("Adding received ICE candidate: " + JSON.stringify(candidate));
+  pc.addIceCandidate(candidate);
 }
 
 function handleGetUserMediaError(e) {
   log(e.name);
   switch(e.name) {
     case "NotFoundError":
-      alert("Unable to open your call because no camera and/or microphone" +
-            "were found.");
+      alert("Unable to open your call because no camera and/or microphone were found.");
       break;
     case "SecurityError":
     case "PermissionDeniedError":
@@ -288,9 +224,5 @@ function handleGetUserMediaError(e) {
       alert("Error opening your camera and/or microphone: " + e.message);
       break;
   }
-
-  // Make sure we shut down our end of the RTCPeerConnection so we're
-  // ready to try again.
-
   closeVideoCall();
 }
