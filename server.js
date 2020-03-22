@@ -7,10 +7,10 @@ const app = express();
 app.use(express.json({ extended: false }));
 app.use(express.static("public"));
 app.get("/", (request, response) => {
-  response.sendFile(__dirname + "/views/driver.html");
+  response.sendFile(__dirname + "/public/driver.html");
 });
 app.get("/robot", (request, response) => {
-  response.sendFile(__dirname + "/views/robot.html");
+  response.sendFile(__dirname + "/public/robot.html");
 });
 
 // Launch express server
