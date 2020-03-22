@@ -39,22 +39,20 @@
         </li>
         <li>
           Optional: Set your own STUN/TURN servers<br>
-          <textarea id="iceServers" cols="50" rows="10">
-{
-  iceTransportPolicy: "all",
-  iceServers: [
-    { urls: [ "stun:rtc-oregon.doublerobotics.com:443" ] },
+          <textarea id="iceConfig" rows="14" style="width: 600px;">{
+  "iceTransportPolicy": "all",
+  "iceServers": [
+    { "urls": [ "stun:rtc-oregon.doublerobotics.com:443" ] },
     {
-      urls: [
+      "urls": [
         "turn:rtc-oregon.doublerobotics.com:443?transport=udp",
-        "turn:rtc-oregon.doublerobotics.com:443?transport=tcp",
+        "turn:rtc-oregon.doublerobotics.com:443?transport=tcp"
       ],
-      username: "open",
-      credential: "open"
+      "username": "open",
+      "credential": "open"
     }
   ]
-}
-          </textarea>
+}</textarea>
         </li>
         <li>
           <input type="button" value="Call" onclick="startCall()">

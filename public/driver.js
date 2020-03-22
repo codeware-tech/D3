@@ -1,21 +1,7 @@
 import { DriverWebRTC } from './driver_webrtc.js';
 
 var webrtc = null;
-var iceConfig = {
-  sdpSemantics: "unified-plan",
-  iceTransportPolicy: "all",
-  iceServers: [
-    { urls: [ "stun:rtc-oregon.doublerobotics.com:443" ] },
-    {
-      urls: [
-        "turn:rtc-oregon.doublerobotics.com:443?transport=udp",
-        "turn:rtc-oregon.doublerobotics.com:443?transport=tcp",
-      ],
-      username: "open",
-      credential: "open"
-    }
-  ]
-};
+var iceConfig = null;
 
 // WebSocket
 
@@ -53,6 +39,7 @@ var cameras = document.getElementById("cameras");
 var mics = document.getElementById("mics");
 var localVideo = document.getElementById("localVideo");
 var urlBox = document.getElementById("urlBox");
+var iceConfigTextarea = document.getElementById("iceConfig");
 
 if (window.location.host == "d3-webrtc-example.glitch.me") {
   urlBox.value = "Do step 1 first!";
@@ -113,6 +100,14 @@ window.updateLocalVideo = () => {
 }
 
 window.startCall = () => {
+  try {
+    iceConfig = JSON.parse(iceConfigTextarea.value.replace(/\n/g, ""));
+  } catch (e) {
+    alert("Error: Could not parse STUN/TURN servers as strict JSON.");
+    return;
+  }
+  iceConfig.sdpSemantics = "unified-plan";
+  
   webrtc = new DriverWebRTC(iceConfig, log, window.sendToServer, window.hangUpCall);
   window.sendToServer({
     type: "startCall",
