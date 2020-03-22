@@ -16,6 +16,7 @@
     <header>
       <h1>D3 WebRTC Example: Driver</h1>
 <!--       <input type="button" value="Hello to Robot" onclick="sendToServer('Hello from driver')"> -->
+      <p>This example shows how to orchestrate a WebRTC call on <a href="https://www.doublerobotics.com" target="_blank">Double 3</a> using the native WebRTC implementation that takes advantage of the hardware h264 encoder. Your robot must be in developer mode.</p>
     </header>
 
     <main>
@@ -28,7 +29,7 @@
         <li>Click "Show" at the top of your Glitch editor to open this page on your computer.</li>
         <li>
           Open on the robot GUI: <!-- https://<span style="color: #EE0000;">$PROJECT_NAME</span>.glitch.me/robot -->
-          <input type="text" value="" size="50" id="urlBox">
+          <input type="text" value="" size="50" id="urlBox" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         </li>
         <li>
           Optional: 
@@ -39,7 +40,7 @@
         </li>
         <li>
           Optional: Set your own STUN/TURN servers<br>
-          <textarea id="iceConfig" rows="14" style="width: 600px;">{
+          <textarea id="iceConfig" rows="14" style="width: 600px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">{
   "iceTransportPolicy": "all",
   "iceServers": [
     { "urls": [ "stun:rtc-oregon.doublerobotics.com:443" ] },

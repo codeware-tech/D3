@@ -17,6 +17,7 @@ socket.onmessage = function(event) {
   }
 
   if (signal) {
+    // Note: DO NOT pass 
     switch (signal.type) {
 
       case "startCall":

@@ -33,13 +33,23 @@ input {
   width: auto;
 }
 
+input[type=button] {
+  border: 1px solid #003758;
+  background: #dff3ff;
+  color: #003758;
+}
+
+input[type=button]:hover {
+  background: #c9ebff;
+}
+
 select {
   font-size: 16px;
 }
 
 textarea {
   font-family: monospace;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 form button {
