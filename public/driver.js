@@ -1,4 +1,5 @@
-import('driver_webrtc.js').then(({ test }) => {
+// import {test} from './driver_webrtc.js';
+import('./driver_webrtc.js').then(({ test }) => {
   // your code
 });
 

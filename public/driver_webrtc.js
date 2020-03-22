@@ -1,3 +1,4 @@
+/*
 // WebRTC
 
 var pc = null;
@@ -165,4 +166,9 @@ function handleGetUserMediaError(e) {
       break;
   }
   hangUpCall();
+}
+*/
+
+export function test() {
+  alert(`Hello`);
 }
