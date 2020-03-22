@@ -25,22 +25,43 @@
       </div>
       <ol>
         <li><a href="https://glitch.com/edit/#!/remix/d3-webrtc-example">Remix this on Glitch</a>, so you create your own app. Loading the shared version (<a href="https://d3-webrtc-example.glitch.me">d3-webrtc-example.glitch.me</a>) onto your robot will expose your robot to anyone else who loads this page!</li>
-        <li>Click "Show" at the top of your Glitch editor.</li>
+        <li>Click "Show" at the top of your Glitch editor to open this page on your computer.</li>
         <li>
+          Open on the robot GUI: <!-- https://<span style="color: #EE0000;">$PROJECT_NAME</span>.glitch.me/robot -->
+          <input type="text" value="" size="50" id="urlBox">
+        </li>
+        <li>
+          Optional: 
           <input type="button" value="List Webcams" onclick="listWebcams()">
           <select id="cameras" onchange="updateLocalVideo()"></select>
           <select id="mics" onchange="updateLocalVideo()"></select>
           <input type="button" value="Clear" onclick="endLocalVideo()">
         </li>
         <li>
-          Open on the robot GUI: <!-- https://<span style="color: #EE0000;">$PROJECT_NAME</span>.glitch.me/robot -->
-          <input type="text" value="" size="50" id="urlBox">
+          Optional: Set your own STUN/TURN servers<br>
+          <textarea id="iceServers" cols="50" rows="10">
+{
+  iceTransportPolicy: "all",
+  iceServers: [
+    { urls: [ "stun:rtc-oregon.doublerobotics.com:443" ] },
+    {
+      urls: [
+        "turn:rtc-oregon.doublerobotics.com:443?transport=udp",
+        "turn:rtc-oregon.doublerobotics.com:443?transport=tcp",
+      ],
+      username: "open",
+      credential: "open"
+    }
+  ]
+}
+          </textarea>
         </li>
         <li>
           <input type="button" value="Call" onclick="startCall()">
           <input type="button" value="Hang Up" onclick="hangUpCall()">
         </li>
       </ol>
+      <hr>
       <div id="logs"></div>
     </main>
     

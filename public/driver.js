@@ -27,7 +27,7 @@ socket.onmessage = function(event) {
   try {
     signal = JSON.parse(event.data);
   } catch (e) {
-    console.log(event.data);
+    log(event.data);
   }
 
   if (signal) {
