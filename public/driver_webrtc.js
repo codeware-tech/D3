@@ -11,7 +11,15 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
     log("Received call offer");
 
     webcamStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-    this.createPeerConnection();
+
+    pc = new RTCPeerConnection(iceConfig);
+    pc.onicecandidate = (event) => this.onicecandidate(event);
+    pc.oniceconnectionstatechange = () => this.oniceconnectionstatechange();
+    pc.onicegatheringstatechange = () => this.onicegatheringstatechange();
+    pc.onsignalingstatechange = () => this.onsignalingstatechange();
+    pc.ontrack = (event) => this.ontrack();
+    // pc.onnegotiationneeded = () => this.onnegotiationneeded();
+    
     webcamStream.getTracks().forEach(track => pc.addTrack(track, webcamStream));
     localVideo.srcObject = webcamStream;
 
@@ -23,55 +31,6 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
     log("Sending SDP answer");
   }
 
-  this.createPeerConnection = async () => {
-    log("Creating peer connection");
-
-    pc = new RTCPeerConnection(iceConfig);
-
-    pc.onicecandidate = (event) => {
-      if (event.candidate) {
-        log("*** Outgoing ICE candidate: " + event.candidate.candidate);
-        sendToServer({
-          sdpMLineIndex: event.candidate.sdpMLineIndex,
-          sdpMid: event.candidate.sdpMid,
-          candidate: event.candidate.candidate
-        });
-      }
-    };
-
-    pc.oniceconnectionstatechange = () => {
-      log("*** ICE connection state changed to " + pc.iceConnectionState);
-      switch(pc.iceConnectionState) {
-        case "closed":
-        case "failed":
-        case "disconnected":
-          hangUpCall();
-          break;
-      }
-    };
-
-    pc.onicegatheringstatechange = () => {
-      log("*** ICE gathering state changed to " + pc.iceGatheringState);
-    };
-
-    pc.onsignalingstatechange = () => {
-      log("*** WebRTC signaling state changed to: " + pc.signalingState);
-      switch(pc.signalingState) {
-        case "closed":
-          hangUpCall();
-          break;
-      }
-    };
-
-    pc.ontrack = (event) => {
-      log("*** Track event");
-      remoteVideo.srcObject = event.streams[0];
-      remoteVideo.controls = true;
-    };
-
-    // pc.onnegotiationneeded = handleNegotiationNeededEvent;
-  }
-
   this.handleCandidate = (candidate) => {
     var candidate = new RTCIceCandidate(candidate);
     log("Adding received ICE candidate: " + JSON.stringify(candidate));
@@ -80,8 +39,8 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
 
   // Called by the WebRTC layer to let us know when it's time to begin, resume, or restart ICE negotiation.
 
-  // async function handleNegotiationNeededEvent() {
-  //   log("*** Negotiation needed");
+  // async function onnegotiationneeded() {
+  //   log("Negotiation needed");
 
   //   try {
   //     log("---> Creating offer");
@@ -110,7 +69,7 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
   //       sdp: pc.localDescription
   //     });
   //   } catch(err) {
-  //     log("*** The following error occurred while handling the negotiationneeded event: "+ err.message);
+  //     log("The following error occurred while handling the negotiationneeded event: "+ err.message);
   //   };
   // }
 
@@ -162,6 +121,48 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
   //   }
   //   hangUpCall();
   // }
+
+  this.onicecandidate = (event) => {
+    if (event.candidate) {
+      log("Outgoing ICE candidate: " + event.candidate.candidate);
+      sendToServer({
+        sdpMLineIndex: event.candidate.sdpMLineIndex,
+        sdpMid: event.candidate.sdpMid,
+        candidate: event.candidate.candidate
+      });
+    }
+  };
+
+  this.oniceconnectionstatechange = () => {
+    log("ICE connection state changed to " + pc.iceConnectionState);
+    switch(pc.iceConnectionState) {
+      case "closed":
+      case "failed":
+      case "disconnected":
+        hangUpCall();
+        break;
+    }
+  };
+
+  this.onicegatheringstatechange = () => {
+    log("ICE gathering state changed to " + pc.iceGatheringState);
+  };
+
+  this.onsignalingstatechange = () => {
+    log("WebRTC signaling state changed to: " + pc.signalingState);
+    switch(pc.signalingState) {
+      case "closed":
+        hangUpCall();
+        break;
+    }
+  };
+
+  this.ontrack = (event) => {
+    log("Track event");
+    remoteVideo.srcObject = event.streams[0];
+    remoteVideo.controls = true;
+  };
+  
 };
 
 export default DriverWebRTC;
