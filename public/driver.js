@@ -18,6 +18,11 @@ socket.onmessage = function(event) {
 
   if (signal) {
     switch (signal.type) {
+
+      case "robotIsAvailable":
+        robotAvailabilityBox.innerText = signal.message;
+        break;
+      
       case "offer":
         webrtc.handleVideoOffer(signal);
         break;
@@ -39,6 +44,7 @@ var cameras = document.getElementById("cameras");
 var mics = document.getElementById("mics");
 var localVideo = document.getElementById("localVideo");
 var urlBox = document.getElementById("urlBox");
+var robotAvailabilityBox = document.getElementById("robotAvailability");
 var iceConfigTextarea = document.getElementById("iceConfig");
 
 if (window.location.host == "d3-webrtc-example.glitch.me") {
@@ -97,6 +103,11 @@ window.updateLocalVideo = () => {
     stopLocalVideo();
     localVideo.srcObject = stream;
   });
+}
+
+window.checkForRobot = () => {
+  robotAvailabilityBox.innerText = "Checking...";
+  window.sendToServer({ type: "isRobotAvailable" });
 }
 
 window.startCall = () => {

@@ -26,18 +26,22 @@
       </div>
       <ol>
         <li><a href="https://glitch.com/edit/#!/remix/d3-webrtc-example">Remix this on Glitch</a>, so you create your own app. Loading the shared version (<a href="https://d3-webrtc-example.glitch.me">d3-webrtc-example.glitch.me</a>) onto your robot will expose your robot to anyone else who loads this page!</li>
+        
         <li>Click "Show" at the top of your Glitch editor to open this driver page on your computer.</li>
+        
         <li>
           Load custom robot Standby GUI (http://ROBOT_LOCAL_IP:8080/ &gt; Dashboard &gt; Standby GUI &gt; GO):<br>
           <input type="text" value="" size="50" id="urlBox" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         </li>
+        
         <li>
-          Optional: 
+          <span class="optional">Optional:</span>
           <input type="button" value="List Webcams" onclick="listWebcams()">
           <select id="cameras" onchange="updateLocalVideo()"></select>
           <select id="mics" onchange="updateLocalVideo()"></select>
           <input type="button" value="Clear" onclick="endLocalVideo()">
         </li>
+
         <li>
           Optional: Set your own STUN/TURN servers<br>
           <textarea id="iceConfig" rows="14" style="width: 600px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">{
@@ -55,6 +59,13 @@
   ]
 }</textarea>
         </li>
+
+        <li>
+          Optional: 
+          <input type="button" value="Check for Robot" onclick="checkForRobot()">
+          &nbsp;<span id="robotAvailability"></span>
+        </li>
+
         <li>
           <input type="button" value="Call" onclick="startCall()">
           <input type="button" value="Hang Up" onclick="hangUpCall()">
