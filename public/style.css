@@ -70,6 +70,6 @@ footer {
 }
 
 #logs div {
-  sfont-family: monospace;
+  font-family: monospace;
   white-space: pre;
 }

@@ -313,6 +313,19 @@ async function handleVideoOfferMsg(msg) {
     createPeerConnection();
   }
 
+  // Get the webcam stream if we don't already have it
+
+  if (webcamStream) {
+    // Add the camera stream to the RTCPeerConnection
+    try {
+      webcamStream.getTracks().forEach(
+        transceiver = track => pc.addTransceiver(track, {streams: [webcamStream]})
+      );
+    } catch(err) {
+      handleGetUserMediaError(err);
+    }
+  }
+  
   // We need to set the remote description to the received SDP offer
   // so that our local WebRTC layer knows how to talk to the caller.
 
@@ -333,19 +346,6 @@ async function handleVideoOfferMsg(msg) {
   } else {
     log ("  - Setting remote description");
     await pc.setRemoteDescription(desc);
-  }
-
-  // Get the webcam stream if we don't already have it
-
-  if (webcamStream) {
-    // Add the camera stream to the RTCPeerConnection
-    try {
-      webcamStream.getTracks().forEach(
-        transceiver = track => pc.addTransceiver(track, {streams: [webcamStream]})
-      );
-    } catch(err) {
-      handleGetUserMediaError(err);
-    }
   }
 
   log("---> Creating and sending answer to caller");
