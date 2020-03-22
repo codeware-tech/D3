@@ -1,4 +1,5 @@
 // Log
+
 var logs = document.querySelector("#logs");
 function log(text) {
   if (text && text.name) {
@@ -9,6 +10,7 @@ function log(text) {
 }
 
 // WebSocket
+
 var socket = new WebSocket("wss://" + window.location.hostname);
 socket.onopen = function(event) { log("Connected"); };
 socket.onclose = function(event) { log("Disconnected"); };
@@ -37,8 +39,27 @@ function sendToServer(message) {
   socket.send(JSON.stringify(message));
 }
 
+// User Interface
+
+function startCall() {
+  document.getElementById("hangup").disabled = false;
+  document.getElementById("start").disabled = true;
+  sendToServer({
+    type: "startCall",
+    servers: iceConfig.iceServers,
+    transportPolicy: iceConfig.iceTransportPolicy
+  });
+}
+
+function hangUpCall() {
+  closeVideoCall();
+  sendToServer({ type: "endCall" });
+  document.getElementById("hangup").disabled = true;
+  document.getElementById("start").disabled = false;
+}
+
 // WebRTC
-var webcamStream = null;
+
 var pc = null;
 var transceiver = null;
 var iceConfig = {
@@ -56,14 +77,6 @@ var iceConfig = {
     }
   ]
 };
-
-function startCall() {
-  sendToServer({
-    type: "startCall",
-    servers: iceConfig.iceServers,
-    transportPolicy: iceConfig.iceTransportPolicy
-  });
-}
 
 async function createPeerConnection() {
   log("Creating peer connection");
@@ -177,37 +190,7 @@ function closeVideoCall() {
 
     pc.close();
     pc = null;
-    webcamStream = null;
   }
-
-  document.getElementById("hangup").disabled = true;
-  document.getElementById("start").disabled = false;
-}
-
-function hangUpCall() {
-  closeVideoCall();
-  sendToServer({ type: "endCall" });
-}
-
-async function handleVideoOffer(msg) {
-  log("Received call offer");
-  document.getElementById("hangup").disabled = false;
-  document.getElementById("start").disabled = true;
-  createPeerConnection();
-  var desc = new RTCSessionDescription(msg);
-  webcamStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-  document.getElementById("localVideo").srcObject = webcamStream;
-  await pc.setRemoteDescription(desc);
-  webcamStream.getTracks().forEach(track => pc.addTrack(track, webcamStream));
-  await pc.setLocalDescription(await pc.createAnswer());
-  sendToServer(pc.localDescription);
-  log("Sending SDP answer");
-}
-
-function handleCandidate(candidate) {
-  var candidate = new RTCIceCandidate(candidate);
-  log("Adding received ICE candidate: " + JSON.stringify(candidate));
-  pc.addIceCandidate(candidate);
 }
 
 function handleGetUserMediaError(e) {
