@@ -80,9 +80,8 @@ var iceConfig = {
 async function handleVideoOffer(msg) {
   log("Received call offer");
 
-  createPeerConnection();
-
   var webcamStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+  createPeerConnection();
   webcamStream.getTracks().forEach(track => pc.addTrack(track, webcamStream));
   document.getElementById("localVideo").srcObject = webcamStream;
 
