@@ -16,7 +16,7 @@
     <header>
       <h1>D3 WebRTC Example: Driver</h1>
 <!--       <input type="button" value="Hello to Robot" onclick="sendToServer('Hello from driver')"> -->
-      <p>This example shows how to orchestrate a WebRTC call on <a href="https://www.doublerobotics.com" target="_blank">Double 3</a> using the native WebRTC implementation that takes advantage of the hardware h264 encoder. Your robot must be in developer mode.</p>
+      <p>This example shows how to orchestrate a WebRTC call on <a href="https://www.doublerobotics.com" target="_blank">Double 3</a> using a custom standby screen and the native WebRTC implementation that takes advantage of the hardware h264 encoder. Your robot must be in developer mode.</p>
     </header>
 
     <main>
@@ -30,10 +30,16 @@
         <li>Click "Show" at the top of your Glitch editor to open this driver page on your computer.</li>
         
         <li>
-          Load custom robot Standby GUI (http://ROBOT_LOCAL_IP:8080/ &gt; Dashboard &gt; Standby GUI &gt; GO):<br>
+          Load custom robot Standby GUI (http://<span style="color: #929292;">ROBOT_LOCAL_IP</span>:8080/ &gt; Dashboard &gt; Standby GUI &gt; GO):<br>
           <input type="text" value="" size="50" id="urlBox" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         </li>
         
+        <li>
+          <span class="optional">Optional:</span>
+          <input type="button" value="Check for Robot" onclick="checkForRobot()">
+          &nbsp;<span id="robotAvailability"></span>
+        </li>
+
         <li>
           <span class="optional">Optional:</span>
           <input type="button" value="List Webcams" onclick="listWebcams()">
@@ -43,27 +49,19 @@
         </li>
 
         <li>
-          Optional: Set your own STUN/TURN servers<br>
-          <textarea id="iceConfig" rows="14" style="width: 600px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">{
+          <span class="optional">Optional:</span>
+          Set your own STUN/TURN servers<br>
+          <textarea id="iceConfig" rows="11" style="width: 600px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">{
   "iceTransportPolicy": "all",
   "iceServers": [
     { "urls": [ "stun:rtc-oregon.doublerobotics.com:443" ] },
     {
-      "urls": [
-        "turn:rtc-oregon.doublerobotics.com:443?transport=udp",
-        "turn:rtc-oregon.doublerobotics.com:443?transport=tcp"
-      ],
+      "urls": [ "turn:rtc-oregon.doublerobotics.com:443" ],
       "username": "open",
       "credential": "open"
     }
   ]
 }</textarea>
-        </li>
-
-        <li>
-          Optional: 
-          <input type="button" value="Check for Robot" onclick="checkForRobot()">
-          &nbsp;<span id="robotAvailability"></span>
         </li>
 
         <li>

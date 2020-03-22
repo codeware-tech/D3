@@ -89,6 +89,11 @@ footer {
   border-top: 1px solid lightgrey;
 }
 
+span.optional {
+  color: #929292;
+  margin-right: 5px;
+}
+
 .streams {
   display: flex;
   justify-content: start;
