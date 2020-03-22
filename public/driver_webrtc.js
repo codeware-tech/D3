@@ -17,7 +17,7 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
     pc.oniceconnectionstatechange = () => this.oniceconnectionstatechange();
     pc.onicegatheringstatechange = () => this.onicegatheringstatechange();
     pc.onsignalingstatechange = () => this.onsignalingstatechange();
-    pc.ontrack = (event) => this.ontrack(e);
+    pc.ontrack = (event) => this.ontrack(event);
     // pc.onnegotiationneeded = () => this.onnegotiationneeded();
     
     webcamStream.getTracks().forEach(track => pc.addTrack(track, webcamStream));

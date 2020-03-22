@@ -34,5 +34,14 @@ webSocketServer.on("connection", socket => {
     });
   });
 
+  // End call when any client disconnects
+  socket.on("close", () => {
+    webSocketServer.clients.forEach(client => {
+      if (client != socket && client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({ type: "endCall" }));
+      }
+    });
+  });
+  
   socket.send("Hello from server");
 });
