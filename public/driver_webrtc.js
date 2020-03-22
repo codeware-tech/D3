@@ -1,41 +1,14 @@
 // WebRTC
 
-export function DriverWebRTC(logFunction, hangUpCallFunction) {
+export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
 
   var pc = null;
-  this.iceConfig = {
-    sdpSemantics: "unified-plan",
-    iceTransportPolicy: "all",
-    iceServers: [
-      { urls: [ "stun:rtc-oregon.doublerobotics.com:443" ] },
-      {
-        urls: [
-          "turn:rtc-oregon.doublerobotics.com:443?transport=udp",
-          "turn:rtc-oregon.doublerobotics.com:443?transport=tcp",
-        ],
-        username: "open",
-        credential: "open"
-      }
-    ]
-  };
 
-  this.log = (arg) => {
-    if (logFunction) {
-      logFunction(arg);
-    }
-  };
-
-  this.hangUpCall = () => {
-    if (hangUpCallFunction) {
-      hangUpCallFunction();
-    }
-  };
-
-  async function handleVideoOffer(msg) {
+  this.handleVideoOffer = async (msg) => {
     log("Received call offer");
 
     var webcamStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-    createPeerConnection();
+    this.createPeerConnection();
     webcamStream.getTracks().forEach(track => pc.addTrack(track, webcamStream));
     document.getElementById("localVideo").srcObject = webcamStream;
 
@@ -47,7 +20,7 @@ export function DriverWebRTC(logFunction, hangUpCallFunction) {
     log("Sending SDP answer");
   }
 
-  async function createPeerConnection() {
+  this.createPeerConnection = async () => {
     log("Creating peer connection");
 
     pc = new RTCPeerConnection(iceConfig);
@@ -96,7 +69,7 @@ export function DriverWebRTC(logFunction, hangUpCallFunction) {
     // pc.onnegotiationneeded = handleNegotiationNeededEvent;
   }
 
-  function handleCandidate(candidate) {
+  this.handleCandidate = (candidate) => {
     var candidate = new RTCIceCandidate(candidate);
     log("Adding received ICE candidate: " + JSON.stringify(candidate));
     pc.addIceCandidate(candidate);
@@ -138,7 +111,7 @@ export function DriverWebRTC(logFunction, hangUpCallFunction) {
   //   };
   // }
 
-  function closeVideoCall() {
+  this.closeVideoCall = () => {
     log("Closing the call");
 
     if (pc) {
@@ -164,22 +137,22 @@ export function DriverWebRTC(logFunction, hangUpCallFunction) {
     }
   }
 
-  function handleGetUserMediaError(e) {
-    log(e.name);
-    switch(e.name) {
-      case "NotFoundError":
-        alert("Unable to open your call because no camera and/or microphone were found.");
-        break;
-      case "SecurityError":
-      case "PermissionDeniedError":
-        // Do nothing; this is the same as the user canceling the call.
-        break;
-      default:
-        alert("Error opening your camera and/or microphone: " + e.message);
-        break;
-    }
-    hangUpCall();
-  }
+  // this.handleGetUserMediaError = (e) => {
+  //   log(e.name);
+  //   switch(e.name) {
+  //     case "NotFoundError":
+  //       alert("Unable to open your call because no camera and/or microphone were found.");
+  //       break;
+  //     case "SecurityError":
+  //     case "PermissionDeniedError":
+  //       // Do nothing; this is the same as the user canceling the call.
+  //       break;
+  //     default:
+  //       alert("Error opening your camera and/or microphone: " + e.message);
+  //       break;
+  //   }
+  //   hangUpCall();
+  // }
 };
 
 export default DriverWebRTC;

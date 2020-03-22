@@ -1,15 +1,21 @@
 import { DriverWebRTC } from './driver_webrtc.js';
 
 var webrtc = null;
-
-var logs = document.querySelector("#logs");
-function log(text) {
-  if (text && text.name) {
-    text = text.name;
-  }
-  console.log(text);
-  logs.innerHTML += "<div>" + text + "</div>";
-}
+var iceConfig = {
+  sdpSemantics: "unified-plan",
+  iceTransportPolicy: "all",
+  iceServers: [
+    { urls: [ "stun:rtc-oregon.doublerobotics.com:443" ] },
+    {
+      urls: [
+        "turn:rtc-oregon.doublerobotics.com:443?transport=udp",
+        "turn:rtc-oregon.doublerobotics.com:443?transport=tcp",
+      ],
+      username: "open",
+      credential: "open"
+    }
+  ]
+};
 
 // WebSocket
 
@@ -21,7 +27,7 @@ socket.onmessage = function(event) {
   try {
     signal = JSON.parse(event.data);
   } catch (e) {
-    console.error(e);
+    console.log(event.data);
   }
 
   if (signal) {
@@ -37,22 +43,33 @@ socket.onmessage = function(event) {
   }
 };
 
-function sendToServer(message) {
+window.sendToServer = function (message) {
   socket.send(JSON.stringify(message));
 }
 
 // User Interface
 
-function startCall() {
-  webrtc = new DriverWebRTC(log, hangUpCall);
-  sendToServer({
+window.startCall = () => {
+  webrtc = new DriverWebRTC(iceConfig, log, window.sendToServer, window.hangUpCall);
+  window.sendToServer({
     type: "startCall",
-    servers: webrtc.iceConfig.iceServers,
-    transportPolicy: webrtc.iceConfig.iceTransportPolicy
+    servers: iceConfig.iceServers,
+    transportPolicy: iceConfig.iceTransportPolicy
   });
 }
 
-function hangUpCall() {
+window.hangUpCall = () => {
   webrtc.closeVideoCall();
-  sendToServer({ type: "endCall" });
+  window.sendToServer({ type: "endCall" });
+}
+
+// Log
+
+var logs = document.querySelector("#logs");
+function log(text) {
+  if (text && text.name) {
+    text = text.name;
+  }
+  console.log(text);
+  logs.innerHTML += "<div>" + text + "</div>";
 }
