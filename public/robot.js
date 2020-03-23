@@ -7,7 +7,11 @@ function log(text) {
 
 var socket = new WebSocket("wss://" + window.location.hostname);
 socket.onopen = function(event) { log("Connected to server"); };
-socket.onclose = function(event) { log("Disconnected from server"); };
+socket.onclose = function(){
+  log("Disconnected from server");
+  ws = null
+  setTimeout(startWebsocket, 5000)
+}
 socket.onmessage = function(event) {
   var signal = null;
   try {
