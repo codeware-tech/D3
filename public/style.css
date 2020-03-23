@@ -76,6 +76,11 @@ ol li {
   margin-bottom: 0.5em;
 }
 
+.optional {
+  color: #929292;
+  margin-right: 5px;
+}
+
 hr {
   background: lightgrey;
   border: none;
@@ -87,11 +92,6 @@ footer {
   margin-top: 1.5em;
   padding-top: 1.5em;
   border-top: 1px solid lightgrey;
-}
-
-span.optional {
-  color: #929292;
-  margin-right: 5px;
 }
 
 .streams {
