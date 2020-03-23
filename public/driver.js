@@ -5,34 +5,45 @@ var iceConfig = null;
 
 // WebSocket
 
-var socket = new WebSocket("wss://" + window.location.hostname);
-socket.onopen = function(event) { log("Connected to server"); };
-socket.onclose = function(event) { log("Disconnected from server"); };
-socket.onmessage = function(event) {
-  var signal = null;
-  try {
-    signal = JSON.parse(event.data);
-  } catch (e) {
-    log(event.data);
+var socket = null;
+function connectWebsocket() {
+  socket = new WebSocket("wss://" + window.location.hostname);
+  socket.onopen = function(event) { log("Connected to server"); };
+
+  socket.onclose = function() {
+    log("Disconnected from server");
+    window.endCall();
+    socket = null;
+    setTimeout(connectWebsocket, 1000);
   }
 
-  if (signal) {
-    switch (signal.type) {
-
-      case "robotIsAvailable":
-        robotAvailabilityBox.innerText = signal.message;
-        break;
-      
-      case "offer":
-        webrtc.handleVideoOffer(signal);
-        break;
-
-      case "candidate":
-        webrtc.handleCandidate(signal.candidate);
-        break;
+  socket.onmessage = function(event) {
+    var signal = null;
+    try {
+      signal = JSON.parse(event.data);
+    } catch (e) {
+      log(event.data);
     }
-  }
-};
+
+    if (signal) {
+      switch (signal.type) {
+
+        case "robotIsAvailable":
+          robotAvailabilityBox.innerText = signal.message;
+          break;
+
+        case "offer":
+          webrtc.handleVideoOffer(signal);
+          break;
+
+        case "candidate":
+          webrtc.handleCandidate(signal.candidate);
+          break;
+      }
+    }
+  };
+}
+connectWebsocket();
 
 window.sendToServer = (message) => {
   socket.send(JSON.stringify(message));
@@ -119,7 +130,7 @@ window.startCall = () => {
   }
   iceConfig.sdpSemantics = "unified-plan";
   
-  webrtc = new DriverWebRTC(iceConfig, log, window.sendToServer, window.hangUpCall);
+  webrtc = new DriverWebRTC(iceConfig, log, window.sendToServer, window.endCall);
   window.sendToServer({
     type: "startCall",
     servers: iceConfig.iceServers,
@@ -128,7 +139,7 @@ window.startCall = () => {
   clearWebcams();
 };
 
-window.hangUpCall = () => {
+window.endCall = () => {
   webrtc.closeVideoCall();
   window.endLocalVideo();
   window.sendToServer({ type: "endCall" });

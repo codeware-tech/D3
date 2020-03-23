@@ -5,55 +5,66 @@ function log(text) {
   logs.innerHTML += "<div>" + text + "</div>";
 }
 
-var socket = new WebSocket("wss://" + window.location.hostname);
-socket.onopen = function(event) { log("Connected to server"); };
-socket.onclose = function(){
-  log("Disconnected from server");
-  ws = null
-  setTimeout(startWebsocket, 5000)
-}
-socket.onmessage = function(event) {
-  var signal = null;
-  try {
-    signal = JSON.parse(event.data);
-  } catch (e) {
-    log(event.data);
+var socket = null;
+function connectWebsocket() {
+  socket = new WebSocket("wss://" + window.location.hostname);
+  socket.onopen = function(event) { log("Connected to server"); };
+
+  socket.onclose = function() {
+    log("Disconnected from server");
+    endCall();
+    socket = null;
+    setTimeout(connectWebsocket, 1000);
   }
 
-  if (signal) {
-    // Note: DO NOT pass DRDoubleSDK commands directy from your driver or you will be opening a massive security hole to your robot. You should use your own command structure for your signaling server, then hard-code commands for the DRDoubleSDK on the robot side - just like we're doing right here.
-    switch (signal.type) {
-
-      case "isRobotAvailable":
-        sendToServer({ type: "robotIsAvailable", message: "Robot is here!" });
-        log("Received availability check");
-        break;
-
-      case "startCall":
-        log("startCall");
-        DRDoubleSDK.sendCommand("webrtc.enable");
-        DRDoubleSDK.sendCommand("camera.enable", { template: "h264ForWebRTC" });
-        window.setTimeout(() => {
-          DRDoubleSDK.sendCommand("webrtc.signal", signal);
-        }, 1000);
-        break;
-
-      case "endCall":
-        log("endCall");
-        DRDoubleSDK.sendCommand("camera.disable");
-        DRDoubleSDK.sendCommand("webrtc.disable");
-        break;
-
-      default:
-        log("Received signal");
-        DRDoubleSDK.sendCommand("webrtc.signal", signal);
-        break;
+  socket.onmessage = function(event) {
+    var signal = null;
+    try {
+      signal = JSON.parse(event.data);
+    } catch (e) {
+      log(event.data);
     }
-  }
-};
+
+    if (signal) {
+      // Note: DO NOT pass DRDoubleSDK commands directy from your driver or you will be opening a massive security hole to your robot. You should use your own command structure for your signaling server, then hard-code commands for the DRDoubleSDK on the robot side - just like we're doing right here.
+      switch (signal.type) {
+
+        case "isRobotAvailable":
+          sendToServer({ type: "robotIsAvailable", message: "Robot is here!" });
+          log("Received availability check");
+          break;
+
+        case "startCall":
+          log("startCall");
+          DRDoubleSDK.sendCommand("webrtc.enable");
+          DRDoubleSDK.sendCommand("camera.enable", { template: "h264ForWebRTC" });
+          window.setTimeout(() => {
+            DRDoubleSDK.sendCommand("webrtc.signal", signal);
+          }, 1000);
+          break;
+
+        case "endCall":
+          endCall();
+          break;
+
+        default:
+          log("Received signal");
+          DRDoubleSDK.sendCommand("webrtc.signal", signal);
+          break;
+      }
+    }
+  };
+}
+connectWebsocket();
 
 function sendToServer(message) {
   socket.send(JSON.stringify(message));
+}
+
+function endCall() {
+  log("endCall");
+  DRDoubleSDK.sendCommand("camera.disable");
+  DRDoubleSDK.sendCommand("webrtc.disable");
 }
 
 // DRDoubleSDK is preloaded in the web view on the robot, so it will show errors on the Glitch.com editor
