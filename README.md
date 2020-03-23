@@ -1,27 +1,16 @@
-# hello-express
+# Double 3 SDK WebRTC Example
 
-A server that serves a webpage, its resources, and some data
+This example shows how to orchestrate a WebRTC call on [Double 3](https://www.doublerobotics.com) using a custom standby screen and the native WebRTC implementation that takes advantage of the hardware h264 encoder. Your robot must be in developer mode.
 
+More documentation on github: [https://github.com/doublerobotics/d3-sdk](https://github.com/doublerobotics/d3-sdk)
 
-## Your Project
+## Getting Started
 
-On the front-end,
+1. [Remix this on Glitch](https://glitch.com/edit/#!/remix/d3-webrtc-example), so you create your own app. Loading the shared version (d3-webrtc-example.glitch.me) onto your robot will expose your robot to anyone else who loads this page!
+1. In the Glitch editor top bar, click Show > In a New Window to open this driver page on your computer.
+3. Follow the instructions on that page
 
-- Edit `views/index.html` to change the content of the webpage
-- `public/client.js` is the javacript that runs when you load the webpage
-- `public/style.css` is the styles for `views/index.html`
-- Drag in `assets`, like images or music, to add them to your project
-
-On the back-end,
-
-- your app starts at `server.js`
-- add frameworks and packages in `package.json`
-- safely store app secrets in `.env` (nobody can see this but you and people you invite)
-
-Click `Show` in the header to see your app live. Updates to your code will instantly deploy.
-
-
-## Made by [Glitch](https://glitch.com/)
+## Powered by [Glitch](https://glitch.com/)
 
 **Glitch** is the friendly community where you'll build the app of your dreams. Glitch lets you instantly create, remix, edit, and host an app, bot or site, and you can invite collaborators or helpers to simultaneously edit code with you.
 
