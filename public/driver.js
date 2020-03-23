@@ -43,11 +43,12 @@ function connectWebsocket() {
     }
   };
 }
-connectWebsocket();
 
 window.sendToServer = (message) => {
   socket.send(JSON.stringify(message));
 };
+
+connectWebsocket();
 
 // User Interface
 

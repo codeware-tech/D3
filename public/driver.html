@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>D3 WebRTC Example: Driver</title>
+    <title>Double 3 WebRTC: Driver</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="A cool thing made with Glitch">
@@ -51,7 +51,7 @@
         <li>
           <span class="optional">Optional:</span>
           Set your own STUN/TURN servers<br>
-          <textarea id="iceConfig" rows="11" style="width: 600px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">{
+          <textarea id="iceConfig" rows="11" style="width: 500px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">{
   "iceTransportPolicy": "all",
   "iceServers": [
     { "urls": [ "stun:rtc-oregon.doublerobotics.com:443" ] },
@@ -71,8 +71,8 @@
 
         <li>
           <span class="optional">Optional:</span> Add robot controls, such as Pole 
-          <input type="button" value="Up" onclick="sendToServer({ type: 'poleUp' })">
-          <input type="button" value="Down" onclick="sendToServer({ type: 'poleDown' })">
+          <input type="button" value="Stand" onclick="sendToServer({ type: 'poleStand' })">
+          <input type="button" value="Sit" onclick="sendToServer({ type: 'poleSit' })">
           <input type="button" value="Stop" onclick="sendToServer({ type: 'poleStop' })">
         </li>
 

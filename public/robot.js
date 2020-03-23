@@ -21,6 +21,7 @@ function connectWebsocket() {
     var signal = null;
     try {
       signal = JSON.parse(event.data);
+      log(signal);
     } catch (e) {
       log(event.data);
     }
@@ -48,21 +49,21 @@ function connectWebsocket() {
           break;
 
         case "answer":
-        case "":
+        case "candidate":
           log("Received signal");
           DRDoubleSDK.sendCommand("webrtc.signal", signal);
           break;
 
         case "poleUp":
-          DRDoubleSDK.sendCommand("base.pole.up");
+          DRDoubleSDK.sendCommand("base.pole.stand");
           break;
 
         case "poleDown":
           DRDoubleSDK.sendCommand("base.pole.sit");
           break;
 
-        case "poleUp":
-          DRDoubleSDK.sendCommand("base.pole.up");
+        case "poleStop":
+          DRDoubleSDK.sendCommand("base.pole.stop");
           break;
       }
     }

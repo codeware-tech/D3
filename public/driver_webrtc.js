@@ -81,6 +81,7 @@ export function DriverWebRTC(iceConfig, log, sendToServer, hangUpCall) {
     if (event.candidate) {
       log("Outgoing ICE candidate: " + event.candidate.candidate);
       sendToServer({
+        type: "candidate",
         sdpMLineIndex: event.candidate.sdpMLineIndex,
         sdpMid: event.candidate.sdpMid,
         candidate: event.candidate.candidate
