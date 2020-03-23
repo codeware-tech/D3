@@ -54,11 +54,11 @@ function connectWebsocket() {
           DRDoubleSDK.sendCommand("webrtc.signal", signal);
           break;
 
-        case "poleUp":
+        case "poleStand":
           DRDoubleSDK.sendCommand("base.pole.stand");
           break;
 
-        case "poleDown":
+        case "poleSit":
           DRDoubleSDK.sendCommand("base.pole.sit");
           break;
 
