@@ -47,9 +47,22 @@ function connectWebsocket() {
           endCall();
           break;
 
-        default:
+        case "answer":
+        case "":
           log("Received signal");
           DRDoubleSDK.sendCommand("webrtc.signal", signal);
+          break;
+
+        case "poleUp":
+          DRDoubleSDK.sendCommand("base.pole.up");
+          break;
+
+        case "poleDown":
+          DRDoubleSDK.sendCommand("base.pole.sit");
+          break;
+
+        case "poleUp":
+          DRDoubleSDK.sendCommand("base.pole.up");
           break;
       }
     }

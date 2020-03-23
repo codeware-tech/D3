@@ -68,6 +68,14 @@
           <input type="button" value="Call" onclick="startCall()">
           <input type="button" value="Hang Up" onclick="endCall()">
         </li>
+
+        <li>
+          <span class="optional">Optional:</span> Add robot controls, such as Pole 
+          <input type="button" value="Up" onclick="sendToServer({ type: 'poleUp' })">
+          <input type="button" value="Down" onclick="sendToServer({ type: 'poleDown' })">
+          <input type="button" value="Stop" onclick="sendToServer({ type: 'poleStop' })">
+        </li>
+
       </ol>
       <hr>
       <div id="logs"></div>
