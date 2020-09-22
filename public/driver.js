@@ -68,20 +68,26 @@ if (window.location.host == "d3-webrtc-example.glitch.me") {
 window.listWebcams = () => {
   window.endLocalVideo();
   
-  navigator.mediaDevices.enumerateDevices()
-  .then(function (devices) {
-    devices.forEach(function(device) {
-      var option = document.createElement("option");
-      option.value = device.deviceId;
-      option.innerText = device.label;
-      if (device.kind == "videoinput") {
-        cameras.appendChild(option);
-      } else if (device.kind == "audioinput") {
-        mics.appendChild(option);
-      }
+  navigator.mediaDevices.getUserMedia({audio: true, video: true})
+  .then(() => {
+    navigator.mediaDevices.enumerateDevices()
+    .then(function (devices) {
+      devices.forEach(function(device) {
+        var option = document.createElement("option");
+        option.value = device.deviceId;
+        option.innerText = device.label;
+        if (device.kind == "videoinput") {
+          cameras.appendChild(option);
+        } else if (device.kind == "audioinput") {
+          mics.appendChild(option);
+        }
+      });
+
+      window.updateLocalVideo();
+    })
+    .catch(function(err) {
+      console.log(err.name + ": " + err.message);
     });
-    
-    window.updateLocalVideo();
   })
   .catch(function(err) {
     console.log(err.name + ": " + err.message);
