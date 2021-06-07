@@ -26,18 +26,18 @@ function connectWebsocket() {
     }
 
     if (signal) {
+      if (!signal.type && signal.candidate) {
+        signal.type = "candidate";
+      }
       switch (signal.type) {
-
         case "robotIsAvailable":
           robotAvailabilityBox.innerText = signal.message;
           break;
-
         case "offer":
           webrtc.handleVideoOffer(signal);
           break;
-
         case "candidate":
-          webrtc.handleCandidate(signal.candidate);
+          webrtc.handleCandidate(signal);
           break;
       }
     }
@@ -150,6 +150,7 @@ window.endCall = () => {
   webrtc.closeVideoCall();
   window.endLocalVideo();
   window.sendToServer({ type: "endCall" });
+  webrtc = null;
 };
 
 // Log
