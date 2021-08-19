@@ -154,7 +154,6 @@ window.endCall = () => {
 };
 
 // Log
-
 var logs = document.querySelector("#logs");
 function log(text) {
   if (text && text.name) {
@@ -163,3 +162,8 @@ function log(text) {
   console.log(text);
   logs.innerHTML += "<div>" + text + "</div>";
 }
+
+// Keep the websocket connection alive
+window.setInterval(() => {
+  window.sendToServer({ ping: 1 });
+}, 1000);

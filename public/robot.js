@@ -129,3 +129,8 @@ DRDoubleSDK.on("event", (message) => {
 
   }
 });
+
+// Keep the websocket connection alive
+window.setInterval(() => {
+  window.sendToServer({ ping: 1 });
+}, 1000);
