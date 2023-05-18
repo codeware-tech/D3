@@ -2,8 +2,16 @@ const { createServer } = require("http");
 const express = require("express");
 const WebSocket = require("ws");
 
+const port = 8080;
+
+
 // Configure express for serving files
 const app = express();
+
+app.listen(port, () => {
+  console.log(`Server started on port ${port}`);
+});
+
 app.use(express.json({ extended: false }));
 app.use(express.static("public"));
 app.get("/", (request, response) => {
