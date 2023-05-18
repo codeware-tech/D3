@@ -62,7 +62,7 @@ var iceConfigTextarea = document.getElementById("iceConfig");
 if (window.location.host == "d3-webrtc-example.glitch.me") {
   urlBox.value = "Do step 1 first!";
 } else {
-  urlBox.value = "http://"+ window.location.host +"/robot";
+  urlBox.value = "https://"+ window.location.host +"/robot";
 }
 
 window.listWebcams = () => {
