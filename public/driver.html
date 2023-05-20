@@ -1,119 +1,392 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
-    <title>D3: Driver</title>
+    <title>Double 3 ROBOTICS : Prototype</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="A cool thing made with Glitch">
-<link id="favicon" rel="icon" href="https://cdn.icon-icons.com/icons2/643/PNG/512/android-robot-figure-avatar-brand_icon-icons.com_59276.png" type="image/png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Double Robotics Controllers">
+    <link id="favicon" rel="icon" href="https://cdn.icon-icons.com/icons2/643/PNG/512/android-robot-figure-avatar-brand_icon-icons.com_59276.png" type="image/png">
     <link rel="stylesheet" href="/style.css">
-    
+    <script src="https://webrtchacks.github.io/adapter/adapter-latest.js"></script>
+    <script src="/driver_webrtc.js" type="module"></script>
+    <script src="/driver.js" type="module"></script>
+	
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-      
-    <style type="text/css">
-    body,td,th {
-	font-family: arial;
-	color: #0F0;
-}
-body {
-	background-color: #000;
-}
 
-input, textarea{
-	color:#000;}
-    </style>
-    <script src="https://webrtchacks.github.io/adapter/adapter-latest.js"></script>
-    <script src="/driver_webrtc.js" type="module"></script>
-    <script src="/driver.js" type="module"></script>
-  </head>
-  <body bgcolor="#000000" background="arial" text="#00FF00">
-    <header>
-      <h2>D3 Test: Driver</h2>
-     </header>
-
-    <main>
-      <div class="streams">
-        <video id="localVideo" autoplay muted></video>
-        <video id="remoteVideo" autoplay muted style="width: 480px;"></video>
-      </div>
-      <ul>
-      
-        <li class="optional">
-          <a href="javascript:sendToServer({ type: 'poleStand' })"><button class="btn"><i class="fa fa-arrow-up"></i></button></a>&nbsp; 
-          <a href="javascript:sendToServer({ type: 'poleSit' })"><button class="btn"><i class="fa fa-arrow-down"></i></button></a>&nbsp; 
-          
-       <a href="javascript:sendToServer({ type: 'poleSit' })"><button class="btn"><i class="fa fa-arrow-left"></i></button></a>&nbsp; 
-       <a href="javascript:sendToServer({ type: 'poleSit' })"><button class="btn"><i class="fa fa-arrow-right"></i></button></a>&nbsp;       
-                 
-          <a href="javascript:sendToServer({ type: 'poleStop' })"><i class="fa fa-stop"></i></a>
-          or 
-          <a href="javascript:sendToServer({ type: 'enableNavigation' })">enable navigation</a>
-          and
-          <a href="javascript:sendToServer({ type: 'relativeTarget', x: 1, y: 0 })">drive forward 1 meter</a>.
-        </li>
-              
-        <li>
-          Load custom robot Standby GUI from the Developer Monitor (http://<span style="color: #929292;">ROBOT_LOCAL_IP</span>:8080/ &gt; Dashboard &gt; Standby GUI &gt; GO):<br>
-          <input type="text" value="" size="50" id="urlBox" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-        </li>
-        
-        <li class="optional">
-          Optional:
-          <input type="button" value="Check for Robot" onclick="checkForRobot()">
-          &nbsp;<span id="robotAvailability"></span>
-        </li>
-
-        <li class="optional">
-          Optional:
-          <input type="button" value="List Webcams" onclick="listWebcams()">
-          <select id="cameras" onchange="updateLocalVideo()"></select>
-          <select id="mics" onchange="updateLocalVideo()"></select>
-          <input type="button" value="Clear" onclick="endLocalVideo()">
-        </li>
-
-        <li class="optional">
-          Optional:
-          <input type="button" value="Preheat" onclick="sendToServer({ type: 'preheat' })">
-          This turns the robot camera on, but without outputting any frames. It saves 1 or 2 seconds in the connecting process.
-        </li>
-
-        <li class="optional">
-          Optional: Set your own STUN/TURN servers (e.g. <a href="https://github.com/coturn/coturn" target="_blank">coturn</a>)<br>
-          <textarea id="iceConfig" rows="11" style="width: 500px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">{
-  "iceTransportPolicy": "all",
-  "iceServers": [
-    { "urls": [ "stun:rtc-oregon.doublerobotics.com:443" ] },
-    {
-      "urls": [ "turns:rtc-oregon.doublerobotics.com:443" ],
-      "username": "open",
-      "credential": "open"
+  <style> 
+    .container{
+        width: 97vw;
+        height: 98vh;
+        position: relative;
+        margin:  0px 0px 0px 0px;
     }
-  ]
-}</textarea>
-        </li>
-
-        <li>
-          <input type="button" value="Call" onclick="startCall()">
-          <input type="button" value="Hang Up" onclick="endCall()">
-        </li>
-
-
-
-      </ul>
-      <hr>
-      <div id="logs"></div>
-    </main>
+    .box{
+        width: 100%;
+        height: 100%;            
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0.8;  /* for demo purpose  */
+    }
     
-    <footer>Test Connection</footer>
+    .box2{
+        width: 100%;
+        height: 100%;            
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0.8;  /* for demo purpose  */
+        background-color:#030;
+    }
+    
+    .stack-top{
+        width: 20%;
+        height: 25%;   	
+        z-index: 9;
+        margin: 20px; /* for demo purpose  */
+    }
+	
+	
+div.fixed {
+  position: fixed;
+  bottom: 0;
+  width: 400px;
+ /*  border: 3px solid #000;
+background-color:#3B3B3B; */
+ background: rgba(1, 1, 1, 0.01);  
+  color:#fff;
+  margin: 0px 10px 0px 5px; 
+  padding: 0px 5px 0px 5px; 
+  opacity:0.5 
+  z-index:10;
+  
+}	
+
+
+
+ select {
+    height:30px;
+	width: 220px;
+  }
+
+  .headerx{
+    color:#009933;
+  }
+  
+	body {
+		font-family: Arial;
+		background-color:#000;
+	
+	}
+
+	/* Style the tab */
+	.tab {
+	  overflow: hidden;
+	 /* border: 1px solid #ccc;
+	 background-color: #f1f1f1; */
+     background: rgba(1, 1, 1, 0.01); 
+	   color:#333;
+	}
+
+	/* Style the buttons inside the tab */
+	.tab button {
+	 /* background-color: inherit; */
+         background: rgba(1, 1, 1, 0.09); 
+	  float: left;
+	  border: none;
+	  outline: none;
+	  cursor: pointer;
+	  padding: 8px 16px;
+	  transition: 0.3s;
+	  font-size: 14px;
+	  color:#366e1e;
+	}
+
+	/* Change background color of buttons on hover */
+	.tab button:hover {
+	  /*background-color: #ddd;*/
+    color:#0F0;
+	}
+
+	/* Create an active/current tablink class */
+	.tab button.active {
+	 /* background-color: #3E3E3D;*/
+     background: rgba(1, 1, 1, 0.01); 
+	  color:#0F0;
+	 /* border: 1px solid #000;*/
+    opacity: 1;
+	}
+
+	/* Style the tab content */
+	.tabcontent {
+	  display: none;
+	  padding: 5px 10px;
+	  /*border: 1px solid #ccc;*/
+	  border-top: none;
+	  color:#fff;
+	}
+	
+	
+<!-- End -->		
+<!-- Game Board -->	
+
+ .gamepad{
+	width:100%;
+  }	
+	
+.btnD3 {
+    background-color: #000;
+    color: #279129;
+    border: 1px solid #0F0;
+}
+ 
+  .btnD3:hover{
+   color:#0F0; 
+  }
+    
+    
+  .btnD3:click{
+   color:#0F0; 
+  }
+ 
+ td {
+  padding: 2px;
+}
+ 
+</style>
+</head>
+
+<body bgcolor="black">
+    <div class="container">
+     
+        <div class="box" style="background: red;">
+          <video  poster="https://icons-for-free.com/iconfiles/png/512/media+multimedia+play+video+youtube+icon-1320086087172082744.png" id="remoteVideo" autoplay muted style="background-color:#000;width:100%; height:100%"></video>
+      </div>
+<!-- <div class="box2" onclick="javascript:sendToServer({ type: 'cameraHit' })"></div>-->
+      
+      <div class="box stack-top" style="background: blue;"> 
+          <video  poster="https://icons-for-free.com/iconfiles/png/512/media+multimedia+play+video+youtube+icon-1320086087172082744.png" id="localVideo" autoplay muted style="background-color:#000;width:100%; height:100%"></video>
+      </div>
+    </div>
+
+
+
+
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------>
+
+
+			<div class="fixed">
+ 				<!-- START OF TAB -->			
+					<div style="width:100%; height:32px;font-size:16px;vertical-align:center"><label style="padding:5px;">&nbsp;</label><img src="https://static-00.iconduck.com/assets.00/burger-menu-5-icon-2048x1536-qq497e5y.png" height="32px" style="float:right; padding:10px;"  onclick="openCity(event, 'none')"></div>
+					<!-- <p>Click on the buttons inside the tabbed menu:</p> -->
+
+					<div class="tab">
+					  <button class="tablinks" onclick="openCity(event, 'London')">Controls</button>
+					  <button class="tablinks" onclick="openCity(event, 'Paris')">Configuration</button>
+					  <button class="tablinks" onclick="openCity(event, 'Tokyo')">Account</button>
+					  <button class="tablinks" onclick="openCity(event, 'Philippines')">  Help  </button>					  
+					</div>
+
+					<div id="London" class="tabcontent">	
+						<table width="100%">
+							<tr>
+								<td width="50%">
+									<table width="100%">
+											<tr>
+												<td><button style="width:100%; height:60px; visibility:hidden" class="btn btnD3" disabled>&nbsp;</button></td>
+												
+												<td><a href="javascript:sendToServer({ type: 'relativeTarget', x: 1, y: 0 })">
+												<button style="width:100%; height:60px" class="btn btnD3"><i class="fa fa-arrow-up"></i></button></a></td>
+												
+												<td><button style="width:100%; height:60px; visibility:hidden" class="btn btnD3" disabled>&nbsp;</button></td>
+											</tr>
+											<tr>
+												<td><a href="javascript:sendToServer({ type: 'relativeTarget', x: 0, y: 0.5 })">
+												<button style="width:100%; height:60px" class="btn btnD3"><i class="fa fa-arrow-left"></i></button></a></td>
+												
+												<td><button style="width:100%; height:60px; " class="btn btnD3"><i class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i></button></td>
+												
+												<td><a href="javascript:sendToServer({ type: 'relativeTarget', x: 0, y: -0.5 })">
+												<button style="width:100%; height:60px" class="btn btnD3"><i class="fa fa-arrow-right"></i></button></a></td>
+											</tr>
+											<tr>
+												<td><button style="width:100%; height:60px; visibility:hidden" class="btn btnD3" disabled><i class="fa fa-arrow-space"></i></button></td>
+											
+												<td><a href="javascript:sendToServer({ type: 'relativeTarget', x: -1, y: 0 })">
+												<button style="width:100%; height:60px" class="btn btnD3"><i class="fa fa-arrow-down"></i></button></a></td>
+												
+												<td><button style="width:100%; height:60px; visibility:hidden" class="btn btnD3" disabled><i class="fa fa-arrow-space"></i></button></td>
+											</tr>
+									</table>
+								 </td>
+							 
+								 <td width="*">						 
+									<table width="100%">
+											<tr>
+												<td>
+													<button style="width:100%; height:60px" class="btn btnD3" onclick="startCall()"><i class="fa fa-phone"></i></button>
+												</td>
+												<td>
+													<button style="width:100%; height:60px" class="btn btnD3" onclick="endCall()">☎</button>
+												</td>
+												<td><a href="javascript:sendToServer({ type: 'relativeTarget', x: 1, y: 0 })">
+													<button style="width:100%; height:60px" class="btn btnD3"> Drive </button></a>
+												</td>												
+											</tr>
+											<tr>
+												<td><a href="javascript:sendToServer({ type: 'enableNavigation' })">
+													  <button style="width:100%; height:60px" class="btn btnD3">Nav</button></a>
+												</td>
+												<td><a href="javascript:sendToServer({ type: 'poleStop' })">
+												<button style="width:100%; height:60px" class="btn btnD3">Stop</button></a></td>
+												
+
+												<td><a href="javascript:sendToServer({ type: 'poleStand' })">
+													  <button style="width:100% ;height:60px" class="btn btnD3"><i class="fa fa-arrow-up"></i></button></a>
+												</td>												
+											</tr>
+											<tr>
+												<td><a href="javascript:sendToServer({ type: 'speaker.enable' })">
+													<button style="width:100%; height:60px" class="btn btnD3"><i class="fa fa-volume-up"></i></button></a>
+												</td>
+												<td>
+												   <a href="javascript:sendToServer({ type: 'speaker.disable' })">
+													<button style="width:100%; height:60px" class="btn btnD3"><i class="fa fa-volume-off"></i></button>
+												  </a>	
+												</td>												
+												<td><a href="javascript:sendToServer({ type: 'poleSit' })">
+													<button style="width:100%; height:60px" class="btn btnD3"><i class="fa fa-arrow-down"></i></button></a>
+												</td>
+											</tr>
+									</table>						 				 
+								 </td>	
+							 </tr>
+						</table>
+					</div>
+					
+
+					<div id="Paris" class="tabcontent">
+					  <p>
+								  <div>
+									  Standby GUI Developer Monitor
+									  <input type="text" value=""  id="urlBox" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width:98%;border:none; font-size:12px" disabled>
+									</div>
+									
+									<div class="optional">
+									  <br>
+									  <input type="button" value="Check for Robot" onclick="checkForRobot()">
+									  &nbsp;<span id="robotAvailability"></span>
+									</div>
+
+									<div class="optional">
+									  <br>
+									  <input type="button" value="     Webcams     " onclick="listWebcams()">
+									  <select id="cameras" onchange="updateLocalVideo()"></select>
+									  <select id="mics" onchange="updateLocalVideo()"></select>
+									  <input type="button" value="Clear" onclick="endLocalVideo()">
+                    <button onclick="navi()">Cam H</button>
+									</div>
+
+									<div class="optional">
+									  <br>
+									  <input type="button" value="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Preheat&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" onclick="sendToServer({ type: 'preheat' })">
+									  &nbsp;This turns the robot camera ON, but without outputting any frames. It saves 1 or 2 seconds in the connecting process.
+									</div>
+
+									<div class="optional" style="display:none"><br>
+									   Using Remote STUN/TURN servers<br>
+								  <textarea id="iceConfig" rows="3" style="width: 100%;overflow:hidden; resize:none; background-color:#000; color:#fff" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" readonly>{
+							  "iceTransportPolicy": "all",
+							  "iceServers": [
+								{ "urls": [ "stun:rtc-oregon.doublerobotics.com:443" ] },
+								{
+								  "urls": [ "turns:rtc-oregon.doublerobotics.com:443" ],
+								  "username": "open",
+								  "credential": "open"
+								}
+							  ]
+							}</textarea>	
+                    
+				 	<!-- <textarea id="iceConfig" rows="3" style="width: 100%;overflow:hidden; resize:none; background-color:#000; color:#fff" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" readonly>{
+										  "iceTransportPolicy": "all",
+									  "iceServers": [
+										{ "urls": [ "stun:a.relay.metered.ca:80" ] },
+										{
+										  "urls": [ "turn:a.relay.metered.ca:443" ],
+										  "username": "85307cf2829d3d279746290e",
+										  "credential": "myrPiKtuS4xxUcTL"
+										}
+									  ]
+							}</textarea>	-->
+                    
+						  </div>		
+									
+						<!-- <div id="logs" style="margin:5px 5px 5px 5px;background-color:#000; color:#fff;"></div>-->
+						<br>
+                        <textarea id="logs" style="width: 100%;overflow:hidden; resize:none; background-color:#000; color:#fff;" ></textarea>
+						<!--<div id="logs" style="margin:5px 5px 5px 5px;background-color:#000; color:#fff;"></div>-->
+					  </p> 
+					</div>
+
+					<div id="Tokyo" class="tabcontent">
+					
+							<h2>Account Information</h2>
+							<p>Resize the browser window to see the effect. When the screen is less than 600px wide, make the two columns stack on top of each other instead of next to each other.</p>	
+							<p>Resize the browser window to see the effect. When the screen is less than 600px wide, make the two columns stack on top of each other instead of next to each other.</p>											
+					
+					</div>
+					
+					<div id="Philippines" class="tabcontent">
+			
+					  <p>
+					  		    <h2><strong>Getting started</strong></h2>
+
+								<p>After downloading the app from our app store, open it to register or log in using your Google or Facebook account.</p>
+
+
+								<h2><strong>Product Catalog</strong></h2>
+
+								<p>From the Product catalog, you can browse for the items you&#39;re interested in, then add them to your cart to place orders. Products listed have prices, brief descriptions, and images.</p>
+
+								<p>&nbsp;</p>
+					  
+					  </p>
+					  
+					</div>		
+
+				<!-- END OF TAB -->	  
+		  </div>
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------>
+
+
+
+
+
 
     <!-- include the Glitch button to show what the webpage is about and
           to make it easier for folks to view source and remix -->
     <div class="glitchButton" style="position:fixed;top:2em;right:20px;"></div>
     <script src="https://button.glitch.me/button.js"></script>
-  </body>
+</body>
+  
+ <script>
+function openCity(evt, cityName) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(cityName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+</script>
 </html>
