@@ -51,5 +51,5 @@ webSocketServer.on("connection", socket => {
     });
   });
   
-  socket.send("Hello from server");
+  socket.send("Welcome from server");
 });
