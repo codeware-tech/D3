@@ -2,33 +2,61 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Double 3 WebRTC: Driver</title>
+    <title>D3: Driver</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="A cool thing made with Glitch">
-    <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+<link id="favicon" rel="icon" href="https://cdn.icon-icons.com/icons2/643/PNG/512/android-robot-figure-avatar-brand_icon-icons.com_59276.png" type="image/png">
     <link rel="stylesheet" href="/style.css">
+    
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      
+    <style type="text/css">
+    body,td,th {
+	font-family: arial;
+	color: #0F0;
+}
+body {
+	background-color: #000;
+}
+
+input, textarea{
+	color:#000;}
+    </style>
     <script src="https://webrtchacks.github.io/adapter/adapter-latest.js"></script>
     <script src="/driver_webrtc.js" type="module"></script>
     <script src="/driver.js" type="module"></script>
   </head>
-  <body>
+  <body bgcolor="#000000" background="arial" text="#00FF00">
     <header>
-      <h1>D3 WebRTC Example: Driver</h1>
-      <p>This example shows how to orchestrate a WebRTC call on <a href="https://www.doublerobotics.com" target="_blank">Double 3</a> using a custom standby screen and the native WebRTC implementation that takes advantage of the hardware h264 encoder. Your robot must be in developer mode.</p>
-    </header>
+      <h2>D3 Test: Driver</h2>
+     </header>
 
     <main>
       <div class="streams">
         <video id="localVideo" autoplay muted></video>
         <video id="remoteVideo" autoplay muted style="width: 480px;"></video>
       </div>
-      <ol>
-
-        <li><input type="button" onclick="window.location='https://glitch.com/edit/#!/remix/d3-webrtc-example';" value="Remix this on Glitch">, so you create your own app. Loading the shared version (<a href="https://d3-webrtc-example.glitch.me">d3-webrtc-example.glitch.me</a>) onto your robot will expose your robot to anyone else who loads this page!</li>
-        
-        <li>In the Glitch editor top bar, click Show &gt; In a New Window to open this driver page on your computer.</li>
-        
+      <ul>
+      
+        <li class="optional">
+          <a href="javascript:sendToServer({ type: 'poleStand' })"><button class="btn"><i class="fa fa-arrow-up"></i></button></a>&nbsp; 
+          <a href="javascript:sendToServer({ type: 'poleSit' })"><button class="btn"><i class="fa fa-arrow-down"></i></button></a>&nbsp; 
+          
+       <a href="javascript:sendToServer({ type: 'poleSit' })"><button class="btn"><i class="fa fa-arrow-left"></i></button></a>&nbsp; 
+       <a href="javascript:sendToServer({ type: 'poleSit' })"><button class="btn"><i class="fa fa-arrow-right"></i></button></a>&nbsp;       
+                 
+          <a href="javascript:sendToServer({ type: 'poleStop' })"><i class="fa fa-stop"></i></a>
+          or 
+          <a href="javascript:sendToServer({ type: 'enableNavigation' })">enable navigation</a>
+          and
+          <a href="javascript:sendToServer({ type: 'relativeTarget', x: 1, y: 0 })">drive forward 1 meter</a>.
+        </li>
+              
         <li>
           Load custom robot Standby GUI from the Developer Monitor (http://<span style="color: #929292;">ROBOT_LOCAL_IP</span>:8080/ &gt; Dashboard &gt; Standby GUI &gt; GO):<br>
           <input type="text" value="" size="50" id="urlBox" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
@@ -74,23 +102,14 @@
           <input type="button" value="Hang Up" onclick="endCall()">
         </li>
 
-        <li class="optional">
-          Optional: Add robot controls, such as Pole 
-          <a href="javascript:sendToServer({ type: 'poleStand' })">stand</a> |
-          <a href="javascript:sendToServer({ type: 'poleSit' })">sit</a> |
-          <a href="javascript:sendToServer({ type: 'poleStop' })">stop</a>
-          or 
-          <a href="javascript:sendToServer({ type: 'enableNavigation' })">enable navigation</a>
-          and
-          <a href="javascript:sendToServer({ type: 'relativeTarget', x: 1, y: 0 })">drive forward 1 meter</a>.
-        </li>
 
-      </ol>
+
+      </ul>
       <hr>
       <div id="logs"></div>
     </main>
     
-    <footer>Made with <a href="https://glitch.com">Glitch</a>!</footer>
+    <footer>Test Connection</footer>
 
     <!-- include the Glitch button to show what the webpage is about and
           to make it easier for folks to view source and remix -->
