@@ -59,7 +59,8 @@ var urlBox = document.getElementById("urlBox");
 var robotAvailabilityBox = document.getElementById("robotAvailability");
 var iceConfigTextarea = document.getElementById("iceConfig");
 
-if (window.location.host == "d3-webrtc-example.glitch.me") {
+//if (window.location.host == "d3-webrtc-example.glitch.me") {
+if (window.location.host == "double-robotics.cyclic.app") {
   urlBox.value = "Do step 1 first!";
 } else {
   urlBox.value = "https://"+ window.location.host +"/robot";
